@@ -834,6 +834,71 @@ button {
     margin-bottom: 18px;
 }
 
+.home-overview-panel {
+    padding: 26px;
+    margin-bottom: 18px;
+    border-radius: 0;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 22%),
+        var(--panel-strong);
+}
+
+.home-overview-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: end;
+    padding-bottom: 22px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+}
+
+.home-overview-top .home-summary-head h2 {
+    max-width: none;
+    font-size: 30px;
+    line-height: 1.15;
+    letter-spacing: 0;
+    margin-bottom: 8px;
+}
+
+.home-overview-top .home-summary-head p {
+    max-width: none;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.home-overview-top .home-summary-actions {
+    margin-top: 0;
+    justify-content: flex-end;
+}
+
+.home-overview-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.8fr);
+    gap: 16px;
+    align-items: stretch;
+}
+
+.home-data-panel {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid var(--border);
+    background: var(--surface-soft);
+}
+
+.home-panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.home-panel-title h3 {
+    font-size: 17px;
+    line-height: 1.25;
+    letter-spacing: 0;
+}
+
 .home-summary-card,
 .home-overview-card,
 .home-record-card {
@@ -918,23 +983,26 @@ button {
 
 .home-metrics-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
 }
 
 .home-metric-card {
-    padding: 18px;
-    border-radius: 18px;
-    background: var(--surface-soft);
-    border: 1px solid var(--secondary-btn-border);
+    min-height: 128px;
+    padding: 16px;
+    border-radius: 0;
+    background: var(--content-well-bg);
+    border: 1px solid var(--content-well-border);
 }
 
 .home-metric-card strong {
     display: block;
-    font-size: 34px;
-    line-height: 0.95;
-    letter-spacing: -0.05em;
-    margin-bottom: 8px;
+    min-height: 38px;
+    font-size: 32px;
+    line-height: 1.08;
+    letter-spacing: 0;
+    margin-bottom: 10px;
+    overflow-wrap: anywhere;
 }
 
 .home-metric-card span {
@@ -954,16 +1022,16 @@ button {
 
 .home-status-stream {
     display: grid;
-    gap: 10px;
-    margin-top: 16px;
+    gap: 0;
+    margin-top: 0;
 }
 
 .home-status-item {
     display: grid;
-    grid-template-columns: 68px 1fr;
-    gap: 12px;
-    padding: 12px 0;
-    border-top: 1px solid rgba(132, 170, 255, 0.08);
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
 }
 
 .home-status-item:first-child {

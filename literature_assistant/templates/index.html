@@ -3,8 +3,8 @@
 {% block page_eyebrow %}总览{% endblock %}
 {% block page_title %}研究工作台{% endblock %}
 {% block content %}
-<section class="home-hero-card glass-card">
-    <div class="home-hero-main">
+<section class="home-overview-panel glass-card">
+    <div class="home-overview-top">
         <div class="home-summary-head">
             <h2>研究总览</h2>
             <p>{{ user.username }}，这里汇总当前资料和最近记录。</p>
@@ -15,45 +15,48 @@
             <a href="/survey" class="btn-secondary">综述</a>
             <a href="/dashboard" class="btn-secondary">趋势</a>
         </div>
-
     </div>
 
-    <div class="home-hero-side">
-        <div class="home-card-header">
-            <div>
+    <div class="home-overview-grid">
+        <section class="home-data-panel">
+            <div class="home-panel-title">
                 <h3>资料状态</h3>
             </div>
-        </div>
+            <div class="home-metrics-grid" id="home-overview-metrics">
+                <div class="home-metric-card">
+                    <strong>--</strong>
+                    <span>总文献数</span>
+                    <small>正在加载</small>
+                </div>
+                <div class="home-metric-card">
+                    <strong>--</strong>
+                    <span>已解析</span>
+                    <small>正在加载</small>
+                </div>
+                <div class="home-metric-card">
+                    <strong>--</strong>
+                    <span>综述记录</span>
+                    <small>正在加载</small>
+                </div>
+                <div class="home-metric-card">
+                    <strong>--</strong>
+                    <span>DeepSeek Key</span>
+                    <small>正在加载</small>
+                </div>
+            </div>
+        </section>
 
-        <div class="home-metrics-grid" id="home-overview-metrics">
-            <div class="home-metric-card">
-                <strong>--</strong>
-                <span>总文献数</span>
-                <small>正在加载</small>
+        <section class="home-data-panel home-progress-panel">
+            <div class="home-panel-title">
+                <h3>当前进度</h3>
             </div>
-            <div class="home-metric-card">
-                <strong>--</strong>
-                <span>已解析</span>
-                <small>正在加载</small>
+            <div class="home-status-stream" id="home-overview-status">
+                <div class="home-status-item">
+                    <span>状态</span>
+                    <p>正在同步当前账户数据。</p>
+                </div>
             </div>
-            <div class="home-metric-card">
-                <strong>--</strong>
-                <span>综述记录</span>
-                <small>正在加载</small>
-            </div>
-            <div class="home-metric-card">
-                <strong>--</strong>
-                <span>DeepSeek Key</span>
-                <small>正在加载</small>
-            </div>
-        </div>
-
-        <div class="home-status-stream" id="home-overview-status">
-            <div class="home-status-item">
-                <span>状态</span>
-                <p>正在同步当前账户数据。</p>
-            </div>
-        </div>
+        </section>
     </div>
 </section>
 
