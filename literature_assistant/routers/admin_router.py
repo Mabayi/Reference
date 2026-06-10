@@ -23,6 +23,10 @@ class TokenDisableRequest(BaseModel):
     disabled: bool
 
 
+class AccountDisableRequest(BaseModel):
+    disabled: bool
+
+
 def _date_key(value: str | None) -> str:
     if not value:
         return ""
@@ -43,12 +47,14 @@ async def overview(request: Request):
     users = user_repo.list_users()
     ticket_stats = support_repo.get_ticket_stats()
     balances = token_repo.list_all_balances()
-    disabled_count = sum(1 for item in balances if int(item.get("is_disabled") or 0))
+    disabled_token_count = sum(1 for item in balances if int(item.get("token_disabled") or 0))
+    disabled_account_count = sum(1 for item in users if int(item.get("is_disabled") or 0))
     return {
         "code": 0,
         "data": {
             "total_users": len(users),
-            "disabled_tokens": disabled_count,
+            "disabled_tokens": disabled_token_count,
+            "disabled_accounts": disabled_account_count,
             "tickets": ticket_stats,
             "feedback": support_repo.get_feedback_stats(),
         },
@@ -101,6 +107,7 @@ async def usage_stats(request: Request):
         "bind_api_key": "绑定密钥",
         "sync_balance": "同步余额",
         "remove_api_key": "移除密钥",
+        "trial_grant": "注册赠送",
         "disable": "停用 API",
         "enable": "恢复 API",
         "admin": "管理员调整",
@@ -129,7 +136,8 @@ async def usage_stats(request: Request):
                 "deepseek_balance_text": user.get("deepseek_balance_text") or "未同步",
                 "consumed": consumed_by_user[user_id],
                 "activity_count": activity_by_user[user_id],
-                "is_disabled": int(user.get("is_disabled") or 0),
+                "token_disabled": int(user.get("token_disabled") or 0),
+                "account_disabled": int(user.get("account_disabled") or 0),
             }
         )
     top_users.sort(key=lambda item: (item["consumed"], item["activity_count"]), reverse=True)
@@ -150,7 +158,8 @@ async def usage_stats(request: Request):
     total_consumed = sum(item["value"] for item in token_consumption_daily)
     bound_key_count = sum(1 for user in users if user.get("deepseek_is_bound"))
     available_key_count = sum(1 for user in users if int(user.get("deepseek_is_available") or 0))
-    disabled_count = sum(1 for user in users if int(user.get("is_disabled") or 0))
+    disabled_token_count = sum(1 for user in users if int(user.get("token_disabled") or 0))
+    disabled_account_count = sum(1 for user in users if int(user.get("account_disabled") or 0))
     active_user_count = len([user_id for user_id, count in activity_by_user.items() if count > 0])
 
     return {
@@ -161,7 +170,8 @@ async def usage_stats(request: Request):
                 "active_users": active_user_count,
                 "bound_key_count": bound_key_count,
                 "available_key_count": available_key_count,
-                "disabled_count": disabled_count,
+                "disabled_count": disabled_token_count,
+                "disabled_account_count": disabled_account_count,
                 "recent_consumed": total_consumed,
                 "token_log_count": len(logs),
                 "ticket_count": len(tickets),
@@ -238,3 +248,21 @@ async def set_token_disabled(request: Request, user_id: int, body: TokenDisableR
         return {"code": 1, "data": None, "message": "用户不存在"}
     token_repo.set_token_disabled(user_id, body.disabled, admin["id"])
     return {"code": 0, "data": {"user_id": user_id, "disabled": body.disabled}, "message": "Token 状态已更新"}
+
+
+@router.patch("/users/{user_id}/disabled")
+async def set_user_disabled(request: Request, user_id: int, body: AccountDisableRequest):
+    admin = require_admin(request)
+    if user_id == admin["id"] and body.disabled:
+        return {"code": 1, "data": None, "message": "不能停用自己的账号"}
+    target = user_repo.get_user_by_id(user_id)
+    if not target:
+        return {"code": 1, "data": None, "message": "用户不存在"}
+    if user_repo.is_admin_username(target.get("username")) and body.disabled:
+        return {"code": 1, "data": None, "message": "不能停用管理员账号"}
+    user_repo.set_user_disabled(user_id, body.disabled)
+    return {
+        "code": 0,
+        "data": {"user_id": user_id, "disabled": body.disabled},
+        "message": "账号状态已更新",
+    }

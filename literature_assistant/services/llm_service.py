@@ -30,12 +30,14 @@ def _get_bound_api_key(user_id: int | None = None) -> str:
 
 def _resolve_api_key(api_key: str | None = None, user_id: int | None = None) -> str:
     resolved_user_id = user_id if user_id is not None else get_current_user_id()
-    if resolved_user_id is not None and token_repo.is_token_disabled(resolved_user_id):
-        raise LLMConfigurationError("当前账户 API 使用已被管理员停用，请联系客服恢复。")
+    if resolved_user_id is not None:
+        ok, message = token_repo.validate_api_access(resolved_user_id)
+        if not ok:
+            raise LLMConfigurationError(message)
 
-    resolved = (api_key or "").strip() or _get_bound_api_key(resolved_user_id) or settings.DEEPSEEK_API_KEY
+    resolved = (api_key or "").strip() or settings.DEEPSEEK_API_KEY or _get_bound_api_key(resolved_user_id)
     if not resolved:
-        raise LLMConfigurationError("未绑定 DeepSeek API Key。请先到 Token 管理页绑定真实 API Key，或在 .env 中配置 DEEPSEEK_API_KEY。")
+        raise LLMConfigurationError("系统 API Key 未配置，请联系管理员处理。")
     return resolved
 
 

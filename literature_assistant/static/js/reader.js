@@ -9,6 +9,7 @@ let pdfViewer = null;
 let eventBus = null;
 let linkService = null;
 let readerAnnotations = [];
+const legacyRectRatioCache = new Map();
 
 document.addEventListener("DOMContentLoaded", async () => {
     readerPaperId = window.PAPER_ID;
@@ -19,6 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 function initToolbar() {
     document.getElementById("btn-highlight")?.addEventListener("click", () => saveSelection("highlight"));
+    document.getElementById("btn-clear-page-highlights")?.addEventListener("click", clearCurrentPageHighlights);
     document.getElementById("btn-annotate")?.addEventListener("click", () => saveSelection("note"));
     document.getElementById("btn-translate")?.addEventListener("click", translateSelected);
     document.getElementById("btn-summary")?.addEventListener("click", summarizePdf);
@@ -50,11 +52,18 @@ function initPdfViewer() {
 
     eventBus.on("scalechanging", () => {
         updateZoomLabel();
+        window.setTimeout(applyAnnotationsToAllPages, 80);
     });
 
     eventBus.on("textlayerrendered", ({ pageNumber }) => {
         applyAnnotationsToPage(pageNumber - 1);
     });
+
+    eventBus.on("pagerendered", ({ pageNumber }) => {
+        applyAnnotationsToPage(pageNumber - 1);
+    });
+
+    window.addEventListener("resize", debounce(applyAnnotationsToAllPages, 120));
 }
 
 function fitPdfWidth() {
@@ -134,7 +143,15 @@ function applyAnnotationsToPage(pageIndex) {
         return;
     }
 
-    const oldOverlays = textLayerDiv.parentElement?.querySelectorAll(`.annotation-overlay[data-page="${pageIndex}"]`) || [];
+    const overlayHost = pageView?.div || textLayerDiv.parentElement;
+    const pageRect = overlayHost?.getBoundingClientRect();
+    const pageWidth = pageRect?.width || overlayHost?.clientWidth || 0;
+    const pageHeight = pageRect?.height || overlayHost?.clientHeight || 0;
+    if (!overlayHost || pageWidth <= 0 || pageHeight <= 0) {
+        return;
+    }
+
+    const oldOverlays = overlayHost.querySelectorAll(`.annotation-overlay[data-page="${pageIndex}"]`) || [];
     oldOverlays.forEach((node) => node.remove());
 
     const pageAnnotations = readerAnnotations.filter((annotation) => Number(annotation.page_index) === pageIndex);
@@ -150,23 +167,98 @@ function applyAnnotationsToPage(pageIndex) {
             continue;
         }
 
-        for (const rect of rects) {
-            if (!rect || typeof rect.left !== "number") {
+        for (const [rectIndex, rect] of rects.entries()) {
+            const displayRect = resolveAnnotationRect(rect, pageWidth, pageHeight, buildLegacyRectCacheKey(annotation, pageIndex, rectIndex, rect));
+            if (!displayRect) {
                 continue;
             }
             const overlay = document.createElement("div");
             overlay.className = annotation.type === "highlight" ? "annotation-overlay annotation-highlight" : "annotation-overlay annotation-note";
             overlay.dataset.page = String(pageIndex);
-            overlay.style.left = `${rect.left}px`;
-            overlay.style.top = `${rect.top}px`;
-            overlay.style.width = `${rect.width}px`;
-            overlay.style.height = `${rect.height}px`;
-            overlay.style.background = annotation.type === "highlight" ? (annotation.color || "#f6e58d") : "transparent";
+            overlay.dataset.id = String(annotation.id || "");
+            overlay.style.left = `${displayRect.left}px`;
+            overlay.style.top = `${displayRect.top + Math.max(1, displayRect.height * 0.14)}px`;
+            overlay.style.width = `${displayRect.width}px`;
+            overlay.style.height = `${Math.max(2, displayRect.height * 0.68)}px`;
+            overlay.style.setProperty("--highlight-color", annotation.color || "#f6e58d");
             overlay.style.borderColor = annotation.color || "#f6e58d";
             overlay.title = annotation.note || annotation.text || "";
-            textLayerDiv.parentElement?.appendChild(overlay);
+            overlayHost.appendChild(overlay);
         }
     }
+}
+
+function resolveAnnotationRect(rect, pageWidth, pageHeight, legacyCacheKey = "") {
+    if (!rect) {
+        return null;
+    }
+
+    const hasRatio = [rect.leftRatio, rect.topRatio, rect.widthRatio, rect.heightRatio].every((value) => typeof value === "number");
+    if (hasRatio) {
+        return {
+            left: rect.leftRatio * pageWidth,
+            top: rect.topRatio * pageHeight,
+            width: rect.widthRatio * pageWidth,
+            height: rect.heightRatio * pageHeight,
+        };
+    }
+
+    const hasStoredPageSize = typeof rect.pageWidth === "number" && rect.pageWidth > 0 && typeof rect.pageHeight === "number" && rect.pageHeight > 0;
+    if (hasStoredPageSize && typeof rect.left === "number" && typeof rect.top === "number" && typeof rect.width === "number" && typeof rect.height === "number") {
+        const scaleX = pageWidth / rect.pageWidth;
+        const scaleY = pageHeight / rect.pageHeight;
+        return {
+            left: rect.left * scaleX,
+            top: rect.top * scaleY,
+            width: rect.width * scaleX,
+            height: rect.height * scaleY,
+        };
+    }
+
+    if (typeof rect.left === "number" && typeof rect.top === "number" && typeof rect.width === "number" && typeof rect.height === "number") {
+        if (legacyCacheKey) {
+            if (!legacyRectRatioCache.has(legacyCacheKey)) {
+                legacyRectRatioCache.set(legacyCacheKey, {
+                    leftRatio: rect.left / pageWidth,
+                    topRatio: rect.top / pageHeight,
+                    widthRatio: rect.width / pageWidth,
+                    heightRatio: rect.height / pageHeight,
+                });
+            }
+            const cached = legacyRectRatioCache.get(legacyCacheKey);
+            return {
+                left: cached.leftRatio * pageWidth,
+                top: cached.topRatio * pageHeight,
+                width: cached.widthRatio * pageWidth,
+                height: cached.heightRatio * pageHeight,
+            };
+        }
+
+        return {
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+        };
+    }
+
+    return null;
+}
+
+function buildLegacyRectCacheKey(annotation, pageIndex, rectIndex, rect) {
+    if (!annotation?.id || !rect) {
+        return "";
+    }
+
+    return [
+        annotation.id,
+        pageIndex,
+        rectIndex,
+        rect.left,
+        rect.top,
+        rect.width,
+        rect.height,
+    ].join(":");
 }
 
 function getSelectionRectData() {
@@ -186,7 +278,9 @@ function getSelectionRectData() {
         return null;
     }
 
-    const firstNode = range.startContainer?.parentElement;
+    const firstNode = range.startContainer?.nodeType === Node.ELEMENT_NODE
+        ? range.startContainer
+        : range.startContainer?.parentElement;
     const pageNode = firstNode?.closest(".page");
     if (!pageNode) {
         return null;
@@ -194,12 +288,34 @@ function getSelectionRectData() {
 
     const pageNumber = Number(pageNode.dataset.pageNumber || 1);
     const pageRect = pageNode.getBoundingClientRect();
-    const normalizedRects = rectList.map((rect) => ({
-        left: rect.left - pageRect.left,
-        top: rect.top - pageRect.top,
-        width: rect.width,
-        height: rect.height,
-    }));
+    const pageWidth = pageRect.width || pageNode.clientWidth;
+    const pageHeight = pageRect.height || pageNode.clientHeight;
+    if (pageWidth <= 0 || pageHeight <= 0) {
+        return null;
+    }
+
+    const normalizedRects = rectList
+        .filter((rect) => rect.bottom >= pageRect.top && rect.top <= pageRect.bottom)
+        .map((rect) => {
+            const left = rect.left - pageRect.left;
+            const top = rect.top - pageRect.top;
+            return {
+                left,
+                top,
+                width: rect.width,
+                height: rect.height,
+                leftRatio: left / pageWidth,
+                topRatio: top / pageHeight,
+                widthRatio: rect.width / pageWidth,
+                heightRatio: rect.height / pageHeight,
+                pageWidth,
+                pageHeight,
+            };
+        });
+
+    if (!normalizedRects.length) {
+        return null;
+    }
 
     return {
         text,
@@ -258,24 +374,27 @@ async function saveSelection(type) {
 
 function renderNotes() {
     const noteContainer = document.getElementById("annotations-list");
-    const notes = readerAnnotations.filter((annotation) => annotation.type === "note");
+    const items = readerAnnotations.filter((annotation) => annotation.type === "note" || annotation.type === "highlight");
 
-    if (!notes.length) {
-        noteContainer.innerHTML = '<p class="empty-hint">暂时还没有批注。</p>';
+    if (!items.length) {
+        noteContainer.innerHTML = '<p class="empty-hint">暂时还没有高亮或批注。</p>';
         return;
     }
 
-    noteContainer.innerHTML = notes.map((note) => `
-        <div class="annotation-item" style="border-left:3px solid ${note.color || "#f6e58d"};">
-            <div class="ann-type">P${Number(note.page_index) + 1}</div>
-            <div class="ann-text">“${window.appEscapeHtml((note.text || "").slice(0, 96))}”</div>
-            <div class="ann-note">${window.appEscapeHtml(note.note || "无附加说明")}</div>
+    noteContainer.innerHTML = items.map((item) => {
+        const isHighlight = item.type === "highlight";
+        return `
+        <div class="annotation-item ${isHighlight ? "annotation-item-highlight" : ""}" style="border-left:3px solid ${item.color || "#f6e58d"};">
+            <div class="ann-type">${isHighlight ? "高亮" : "批注"} · P${Number(item.page_index) + 1}</div>
+            <div class="ann-text">“${window.appEscapeHtml((item.text || "").slice(0, 96))}”</div>
+            ${isHighlight ? "" : `<div class="ann-note">${window.appEscapeHtml(item.note || "无附加说明")}</div>`}
             <div class="actions-bar">
-                <button class="btn-secondary ann-jump" data-page="${note.page_index}">定位到批注</button>
-                <button class="ann-delete" data-id="${note.id}">删除批注</button>
+                <button class="btn-secondary ann-jump" data-page="${item.page_index}">定位</button>
+                <button class="ann-delete" data-id="${item.id}">${isHighlight ? "清除高亮" : "删除批注"}</button>
             </div>
         </div>
-    `).join("");
+    `;
+    }).join("");
 
     noteContainer.querySelectorAll(".ann-delete").forEach((button) => {
         button.addEventListener("click", () => deleteAnnotation(Number(button.dataset.id)));
@@ -346,16 +465,53 @@ async function summarizePdf() {
 }
 
 async function deleteAnnotation(id) {
+    await deleteAnnotationsByIds([id], "已删除");
+}
+
+async function clearCurrentPageHighlights() {
+    const currentPageIndex = Math.max(0, Number(pdfViewer?.currentPageNumber || 1) - 1);
+    const highlights = readerAnnotations.filter((annotation) => (
+        annotation.type === "highlight"
+        && Number(annotation.page_index) === currentPageIndex
+        && annotation.id
+    ));
+
+    if (!highlights.length) {
+        window.appNotify(`第 ${currentPageIndex + 1} 页没有高亮`, "info");
+        return;
+    }
+
+    const confirmed = await window.appConfirm("清除本页高亮", {
+        message: `将删除第 ${currentPageIndex + 1} 页的 ${highlights.length} 条高亮，批注不会删除。`,
+        confirmText: "清除",
+        cancelText: "取消",
+    });
+
+    if (!confirmed) {
+        return;
+    }
+
+    await deleteAnnotationsByIds(highlights.map((annotation) => annotation.id), "本页高亮已清除");
+}
+
+async function deleteAnnotationsByIds(ids, successMessage) {
+    const validIds = ids.map(Number).filter((id) => Number.isFinite(id) && id > 0);
+    if (!validIds.length) {
+        return;
+    }
+
     try {
-        const response = await fetch(`/api/reader/annotation/${id}`, { method: "DELETE" });
-        const data = await response.json();
-        if (data.code !== 0) {
-            window.appNotify(data.message || "删除失败", "error");
-            return;
+        for (const id of validIds) {
+            const response = await fetch(`/api/reader/annotation/${id}`, { method: "DELETE" });
+            const data = await response.json();
+            if (data.code !== 0) {
+                window.appNotify(data.message || "删除失败", "error");
+                return;
+            }
         }
 
         await loadAnnotations();
-        window.appNotify("批注已删除", "success");
+        window.appNotify(successMessage, "success");
     } catch (error) {
         window.appNotify("删除失败，请稍后重试", "error");
     }
@@ -364,4 +520,12 @@ async function deleteAnnotation(id) {
 function clearSelection() {
     const selection = window.getSelection();
     selection?.removeAllRanges();
+}
+
+function debounce(callback, delay) {
+    let timer = null;
+    return (...args) => {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => callback(...args), delay);
+    };
 }

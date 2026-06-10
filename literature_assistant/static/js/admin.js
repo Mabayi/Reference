@@ -21,6 +21,20 @@ document.addEventListener("DOMContentLoaded", () => {
         return Number(value || 0).toLocaleString("zh-CN");
     }
 
+    function formatCents(value) {
+        const cents = Number(value || 0);
+        return `¥${(cents / 100).toLocaleString("zh-CN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        })}`;
+    }
+
+    function formatSignedCents(value) {
+        const cents = Number(value || 0);
+        const sign = cents > 0 ? "+" : cents < 0 ? "-" : "";
+        return `${sign}${formatCents(Math.abs(cents))}`;
+    }
+
     function shortDate(value) {
         const parts = String(value || "").split("-");
         if (parts.length !== 3) {
@@ -197,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <i style="width:${Math.max(5, (item.value / maxValue) * 100)}%"></i>
                         </div>
                         <strong>${formatNumber(item.value)} 次</strong>
-                        <small>${formatNumber(item.amount)} token</small>
+                        <small>${formatCents(item.amount)}</small>
                     </div>
                 `).join("")}
             </div>
@@ -234,7 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <span class="admin-rank">${index + 1}</span>
                             <div class="admin-top-user-main">
                                 <strong>${window.appEscapeHtml(user.username || "-")}</strong>
-                        <small>${formatNumber(user.consumed)} API token · ${formatNumber(user.activity)} 次记录 · ${window.appEscapeHtml(user.deepseek_balance_text || "未绑定")}</small>
+                        <small>${formatCents(user.consumed)} · ${formatNumber(user.activity)} 次记录 · ${window.appEscapeHtml(user.balance_text || "¥0.00")}</small>
                             </div>
                             <div class="admin-top-user-bar">
                                 <i style="width:${width}%"></i>
@@ -303,6 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const feedback = data.feedback || {};
         const cards = [
             { label: "用户数", value: data.total_users || 0 },
+            { label: "账号停用", value: data.disabled_accounts || 0 },
             { label: "待处理工单", value: tickets.open || 0 },
             { label: "AI 回复有效", value: feedback.helpful || 0 },
             { label: "AI 回复无效", value: feedback.not_helpful || 0 },
@@ -329,6 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (usageSummary) {
             const summaryCards = [
                 { label: "活跃用户", value: summary.active_users || 0 },
+                { label: "账号停用", value: summary.disabled_account_count || 0 },
                 { label: "已绑 Key", value: summary.bound_key_count || 0 },
                 { label: "Key 可用", value: summary.available_key_count || 0 },
                 { label: "API 停用", value: summary.disabled_count || 0 },
@@ -343,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `).join("");
         }
         if (usageRecentConsumed) {
-            usageRecentConsumed.textContent = `${formatNumber(summary.recent_consumed || 0)} token`;
+            usageRecentConsumed.textContent = formatCents(summary.recent_consumed || 0);
         }
         renderLineChart(usageTokenTrend, data.token_consumption_daily || [], "最近 7 天暂无 API 用量。");
         renderColumnChart(usageUserGrowth, data.new_users_daily || [], "最近 7 天暂无新增用户。");
@@ -440,7 +456,9 @@ document.addEventListener("DOMContentLoaded", () => {
         userList.innerHTML = `
             <div class="admin-user-grid">
                 ${users.map((user) => {
-                    const disabled = Boolean(Number(user.is_disabled || 0));
+                    const isAdmin = Boolean(Number(user.is_admin || 0));
+                    const accountDisabled = Boolean(Number(user.account_disabled || 0));
+                    const tokenDisabled = Boolean(Number(user.token_disabled || user.is_disabled || 0));
                     return `
                         <article class="admin-user-item">
                             <div class="admin-user-main">
@@ -448,23 +466,27 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <div>
                                     <div class="admin-user-title">
                                         <strong>${window.appEscapeHtml(user.username || "-")}</strong>
-                                        ${Number(user.is_admin || 0) ? '<span class="status-pill" data-status="in_progress">管理员</span>' : '<span class="status-pill" data-status="resolved">普通用户</span>'}
-                                        <span class="status-pill" data-status="${disabled ? "closed" : "resolved"}">${disabled ? "API 停用" : "API 正常"}</span>
+                                        ${isAdmin ? '<span class="status-pill" data-status="in_progress">管理员</span>' : '<span class="status-pill" data-status="resolved">普通用户</span>'}
+                                        <span class="status-pill" data-status="${accountDisabled ? "closed" : "resolved"}">${accountDisabled ? "账号停用" : "账号正常"}</span>
+                                        <span class="status-pill" data-status="${tokenDisabled ? "closed" : "resolved"}">${tokenDisabled ? "API 停用" : "API 正常"}</span>
                                         <span class="status-pill" data-status="${Number(user.deepseek_is_available || 0) ? "resolved" : "in_progress"}">${user.deepseek_is_bound ? (Number(user.deepseek_is_available || 0) ? "Key 可用" : "Key 不可用") : "未绑定 Key"}</span>
                                     </div>
                                     <p>${window.appEscapeHtml(user.email || "-")}</p>
                                 </div>
                             </div>
                             <div class="admin-user-metrics">
-                                <span><small>DeepSeek 余额</small><strong>${window.appEscapeHtml(user.deepseek_balance_text || "未同步")}</strong></span>
+                                <span><small>本地额度</small><strong>${window.appEscapeHtml(user.balance_text || "¥0.00")}</strong></span>
                                 <span><small>绑定 Key</small><strong>${window.appEscapeHtml(user.deepseek_key_mask || "未绑定")}</strong></span>
                                 <span><small>可用性</small><strong>${Number(user.deepseek_is_available || 0) ? "可用" : "未确认"}</strong></span>
                             </div>
                             <div class="admin-user-foot">
                                 <span>注册：${window.appEscapeHtml(user.created_at || "-")}</span>
                                 <span>最后登录：${window.appEscapeHtml(user.last_login || "未记录")}</span>
-                                <button class="btn-secondary btn-toggle-token" type="button" data-user-id="${user.user_id}" data-disabled="${disabled ? "0" : "1"}">
-                                    ${disabled ? "恢复 API" : "停用 API"}
+                                <button class="btn-secondary btn-toggle-account" type="button" data-user-id="${user.user_id}" data-disabled="${accountDisabled ? "0" : "1"}" ${isAdmin ? "disabled" : ""}>
+                                    ${accountDisabled ? "恢复账号" : "停用账号"}
+                                </button>
+                                <button class="btn-secondary btn-toggle-token" type="button" data-user-id="${user.user_id}" data-disabled="${tokenDisabled ? "0" : "1"}">
+                                    ${tokenDisabled ? "恢复 API" : "停用 API"}
                                 </button>
                             </div>
                         </article>
@@ -487,27 +509,30 @@ document.addEventListener("DOMContentLoaded", () => {
                         <tr>
                             <th>用户</th>
                             <th>邮箱</th>
-                            <th>DeepSeek 余额</th>
-                            <th>绑定 Key</th>
-                            <th>Key 状态</th>
-                            <th>状态</th>
+                            <th>本地额度</th>
+                            <th>账号状态</th>
+                            <th>API 状态</th>
                             <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${users.map((user) => {
-                            const disabled = Boolean(Number(user.is_disabled || 0));
+                            const isAdmin = Boolean(Number(user.is_admin || 0));
+                            const accountDisabled = Boolean(Number(user.account_disabled || 0));
+                            const tokenDisabled = Boolean(Number(user.token_disabled || user.is_disabled || 0));
                             return `
                                 <tr>
-                                    <td>${window.appEscapeHtml(user.username || "-")}${Number(user.is_admin || 0) ? " · 管理员" : ""}</td>
+                                    <td>${window.appEscapeHtml(user.username || "-")}${isAdmin ? " · 管理员" : ""}</td>
                                     <td>${window.appEscapeHtml(user.email || "-")}</td>
-                                    <td>${window.appEscapeHtml(user.deepseek_balance_text || "未同步")}</td>
-                                    <td>${window.appEscapeHtml(user.deepseek_key_mask || "未绑定")}</td>
-                                    <td><span class="status-pill" data-status="${Number(user.deepseek_is_available || 0) ? "resolved" : "in_progress"}">${user.deepseek_is_bound ? (Number(user.deepseek_is_available || 0) ? "可用" : "不可用") : "未绑定"}</span></td>
-                                    <td><span class="status-pill" data-status="${disabled ? "closed" : "resolved"}">${disabled ? "API 已停用" : "API 正常"}</span></td>
+                                    <td>${window.appEscapeHtml(user.balance_text || "¥0.00")}</td>
+                                    <td><span class="status-pill" data-status="${accountDisabled ? "closed" : "resolved"}">${accountDisabled ? "账号已停用" : "账号正常"}</span></td>
+                                    <td><span class="status-pill" data-status="${tokenDisabled ? "closed" : "resolved"}">${tokenDisabled ? "API 已停用" : "API 正常"}</span></td>
                                     <td>
-                                        <button class="btn-secondary btn-toggle-token" data-user-id="${user.user_id}" data-disabled="${disabled ? "0" : "1"}">
-                                            ${disabled ? "恢复 API" : "停用 API"}
+                                        <button class="btn-secondary btn-toggle-account" data-user-id="${user.user_id}" data-disabled="${accountDisabled ? "0" : "1"}" ${isAdmin ? "disabled" : ""}>
+                                            ${accountDisabled ? "恢复账号" : "停用账号"}
+                                        </button>
+                                        <button class="btn-secondary btn-toggle-token" data-user-id="${user.user_id}" data-disabled="${tokenDisabled ? "0" : "1"}">
+                                            ${tokenDisabled ? "恢复 API" : "停用 API"}
                                         </button>
                                     </td>
                                 </tr>
@@ -543,7 +568,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <th>时间</th>
                             <th>用户</th>
                             <th>类型</th>
-                            <th>数量</th>
+                            <th>金额</th>
                             <th>说明</th>
                         </tr>
                     </thead>
@@ -556,7 +581,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                     <td>${window.appEscapeHtml(log.created_at || "-")}</td>
                                     <td>${window.appEscapeHtml(log.username || "-")}</td>
                                     <td>${window.appEscapeHtml(log.action || "-")}</td>
-                                    <td class="${amountClass}">${amount > 0 ? `+${amount}` : amount}</td>
+                                    <td class="${amountClass}">${window.appEscapeHtml(formatSignedCents(amount))}</td>
                                     <td>${window.appEscapeHtml(log.description || "-")}</td>
                                 </tr>
                             `;
@@ -652,8 +677,34 @@ document.addEventListener("DOMContentLoaded", () => {
         await Promise.all([loadTokenUsers(), loadTokenLogs(), loadOverview(), loadUsage()]);
     }
 
+    async function handleToggleAccount(event) {
+        const button = event.target.closest(".btn-toggle-account");
+        if (!button || button.disabled) {
+            return;
+        }
+        const disabled = button.dataset.disabled === "1";
+        const confirmed = await window.appConfirm(disabled ? "确认停用该用户账号？" : "确认恢复该用户账号？", {
+            message: disabled ? "停用后该用户不能登录，已有登录态也会失效。" : "恢复后该用户可以重新登录系统。",
+            confirmText: disabled ? "停用账号" : "恢复账号",
+        });
+        if (!confirmed) {
+            return;
+        }
+        button.disabled = true;
+        const response = await fetch(`/api/admin/users/${button.dataset.userId}/disabled`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ disabled }),
+        });
+        const data = await response.json();
+        window.appNotify(data.message || "账号状态已更新", data.code === 0 ? "success" : "error");
+        await Promise.all([loadTokenUsers(), loadOverview(), loadUsage()]);
+    }
+
     tokenUsers?.addEventListener("click", handleToggleToken);
+    tokenUsers?.addEventListener("click", handleToggleAccount);
     userList?.addEventListener("click", handleToggleToken);
+    userList?.addEventListener("click", handleToggleAccount);
     refreshUsageButton?.addEventListener("click", loadUsage);
 
     Promise.all([loadOverview(), loadUsage(), loadTickets(), loadTokenUsers(), loadTokenLogs()]).catch(() => {

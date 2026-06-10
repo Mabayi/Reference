@@ -1,6 +1,6 @@
 import bcrypt
 
-from repositories import user_repo
+from repositories import token_repo, user_repo
 
 
 def is_admin_user(user: dict | None) -> bool:
@@ -37,7 +37,9 @@ def create_user(username: str, email: str, password: str) -> dict:
     if user_repo.get_user_by_username(clean_email):
         raise ValueError("邮箱不能与已有用户名相同")
     password_hash = hash_password(password)
-    return user_repo.create_user(clean_username, clean_email, password_hash)
+    user = user_repo.create_user(clean_username, clean_email, password_hash)
+    token_repo.grant_signup_credit(int(user["id"]))
+    return user
 
 
 def authenticate(identifier: str, password: str) -> dict | None:
@@ -45,6 +47,8 @@ def authenticate(identifier: str, password: str) -> dict | None:
     user = user_repo.get_user_by_identifier(identifier)
     if not user:
         return None
+    if int(user.get("is_disabled") or 0):
+        raise ValueError("该账号已被管理员停用")
     if not verify_password(password, user["password_hash"]):
         return None
     user_repo.update_last_login(user["id"])

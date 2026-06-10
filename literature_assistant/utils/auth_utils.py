@@ -27,7 +27,10 @@ def get_current_user(request: Request) -> dict | None:
         data = _serializer.loads(token, max_age=MAX_AGE)
     except (BadSignature, SignatureExpired):
         return None
-    return user_repo.get_user_by_id(data["user_id"])
+    user = user_repo.get_user_by_id(data["user_id"])
+    if not user or int(user.get("is_disabled") or 0):
+        return None
+    return user
 
 
 def require_login(request: Request) -> dict:

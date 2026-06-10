@@ -1,10 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const bindButton = document.getElementById("btn-bind-key");
-    const refreshButton = document.getElementById("btn-refresh-deepseek");
-    const removeButton = document.getElementById("btn-remove-key");
-    const apiKeyInput = document.getElementById("deepseek-api-key");
-    const messageBox = document.getElementById("deepseek-msg");
-    const detailBox = document.getElementById("deepseek-account-detail");
+    const messageBox = document.getElementById("token-msg");
+    const detailBox = document.getElementById("system-account-detail");
+    const discountContactButton = document.getElementById("btn-discount-contact");
+    const wechatModal = document.getElementById("wechat-contact-modal");
 
     function setMessage(message, ok = true) {
         if (!messageBox) {
@@ -14,65 +12,72 @@ document.addEventListener("DOMContentLoaded", () => {
         messageBox.className = ok ? "msg msg-success" : "msg msg-error";
     }
 
-    function moneyText(value, currency) {
-        const number = Number(value || 0);
-        if (Number.isNaN(number)) {
-            return `${window.appEscapeHtml(value || "0")} ${window.appEscapeHtml(currency || "")}`;
-        }
-        return `${number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })} ${window.appEscapeHtml(currency || "")}`;
+    function formatCents(value) {
+        const cents = Number(value || 0);
+        return `¥${(cents / 100).toLocaleString("zh-CN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        })}`;
     }
 
-    function renderDeepSeekAccount(account) {
-        const balanceElement = document.getElementById("deepseek-balance");
-        const statusElement = document.getElementById("deepseek-key-status");
-        if (!account || !account.is_bound) {
-            balanceElement.textContent = "-";
-            statusElement.textContent = "未绑定";
-            detailBox.innerHTML = '<p class="empty-hint">还没有绑定 DeepSeek API Key。请先在官方平台创建密钥，然后在这里绑定验证。</p>';
-            refreshButton.disabled = true;
-            removeButton.disabled = true;
+    function formatSignedCents(value) {
+        const cents = Number(value || 0);
+        const sign = cents > 0 ? "+" : cents < 0 ? "-" : "";
+        return `${sign}${formatCents(Math.abs(cents))}`;
+    }
+
+    function renderSystemStatus(status) {
+        const balanceElement = document.getElementById("local-balance");
+        const statusElement = document.getElementById("system-key-status");
+        const balance = status.balance || {};
+        const isConfigured = Boolean(status.is_bound);
+
+        if (balanceElement) {
+            balanceElement.textContent = balance.balance_text || formatCents(balance.balance || 0);
+        }
+        if (statusElement) {
+            statusElement.textContent = isConfigured ? "可用" : "未配置";
+        }
+        if (!detailBox) {
             return;
         }
-
-        const balanceInfos = account.balance_infos || [];
-        const primaryBalance = balanceInfos[0] || {};
-        balanceElement.textContent = primaryBalance.total_balance
-            ? moneyText(primaryBalance.total_balance, primaryBalance.currency)
-            : "-";
-        statusElement.textContent = Number(account.is_available || 0) ? "可用" : "不可用";
-        refreshButton.disabled = false;
-        removeButton.disabled = false;
 
         detailBox.innerHTML = `
             <div class="deepseek-key-card">
                 <div>
-                    <span>已绑定 Key</span>
-                    <strong>${window.appEscapeHtml(account.key_mask || "-")}</strong>
+                    <span>系统 Key</span>
+                    <strong>${window.appEscapeHtml(status.key_mask || "未配置")}</strong>
                 </div>
                 <div>
-                    <span>最近校验</span>
-                    <strong>${window.appEscapeHtml(account.checked_at || "未记录")}</strong>
+                    <span>扣费规则</span>
+                    <strong>${window.appEscapeHtml(String(status.billing_cents_per_1000_tokens || "0"))} 分 / 1000 tokens</strong>
                 </div>
             </div>
             <div class="deepseek-balance-list">
-                ${balanceInfos.length ? balanceInfos.map((item) => `
-                    <div class="deepseek-balance-row">
-                        <span>${window.appEscapeHtml(item.currency || "-")}</span>
-                        <strong>${moneyText(item.total_balance, item.currency)}</strong>
-                        <small>充值 ${moneyText(item.topped_up_balance, item.currency)} · 赠送 ${moneyText(item.granted_balance, item.currency)}</small>
-                    </div>
-                `).join("") : '<p class="empty-hint">DeepSeek 未返回余额明细。</p>'}
+                <div class="deepseek-balance-row">
+                    <span>当前额度</span>
+                    <strong>${window.appEscapeHtml(balance.balance_text || formatCents(balance.balance || 0))}</strong>
+                    <small>新用户注册默认赠送 5 元，AI 调用后自动扣减。</small>
+                </div>
+                <div class="deepseek-balance-row">
+                    <span>累计充值</span>
+                    <strong>${window.appEscapeHtml(balance.total_purchased_text || "¥0.00")}</strong>
+                    <small>线上支付未开通，充值请联系页面下方客服微信。</small>
+                </div>
             </div>
         `;
     }
 
-    async function loadDeepSeekStatus() {
+    async function loadSystemStatus() {
         const response = await fetch("/api/tokens/deepseek/status");
         const data = await response.json();
         if (data.code === 0) {
-            renderDeepSeekAccount(data.data || {});
+            renderSystemStatus(data.data || {});
+            if (data.message && data.message !== "ok") {
+                setMessage(data.message, false);
+            }
         } else {
-            setMessage(data.message || "DeepSeek 账户状态加载失败", false);
+            setMessage(data.message || "系统 API 状态加载失败", false);
         }
     }
 
@@ -80,8 +85,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const response = await fetch("/api/tokens/stats");
         const data = await response.json();
         if (data.code === 0) {
-            document.getElementById("today-cost").textContent = Number(data.data.today || 0).toLocaleString();
-            document.getElementById("week-cost").textContent = Number(data.data.week || 0).toLocaleString();
+            document.getElementById("today-cost").textContent = formatCents(data.data.today || 0);
+            document.getElementById("week-cost").textContent = formatCents(data.data.week || 0);
         }
     }
 
@@ -91,6 +96,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await response.json();
         const logs = data.data || [];
 
+        if (!container) {
+            return;
+        }
         if (!logs.length) {
             container.innerHTML = '<p class="empty-hint">近 7 天暂无系统用量记录。</p>';
             return;
@@ -103,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <tr>
                             <th>时间</th>
                             <th>类型</th>
-                            <th>数量</th>
+                            <th>金额</th>
                             <th>说明</th>
                         </tr>
                     </thead>
@@ -111,12 +119,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         ${logs.map((log) => {
                             const amount = Number(log.amount || 0);
                             const amountClass = amount >= 0 ? "log-add" : "log-consume";
-                            const amountText = amount > 0 ? `+${amount}` : `${amount}`;
                             return `
                                 <tr>
-                                    <td>${window.appEscapeHtml(log.created_at)}</td>
-                                    <td>${window.appEscapeHtml(log.action)}</td>
-                                    <td class="${amountClass}">${window.appEscapeHtml(amountText)}</td>
+                                    <td>${window.appEscapeHtml(log.created_at || "-")}</td>
+                                    <td>${window.appEscapeHtml(log.action || "-")}</td>
+                                    <td class="${amountClass}">${window.appEscapeHtml(formatSignedCents(amount))}</td>
                                     <td>${window.appEscapeHtml(log.description || "-")}</td>
                                 </tr>
                             `;
@@ -127,94 +134,33 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-    bindButton?.addEventListener("click", async () => {
-        const apiKey = apiKeyInput.value.trim();
-        if (!apiKey) {
-            window.appNotify("请输入 DeepSeek API Key", "warning");
+    function openWechatModal() {
+        if (!wechatModal) {
             return;
         }
+        wechatModal.hidden = false;
+        document.body.classList.add("modal-open");
+    }
 
-        bindButton.disabled = true;
-        bindButton.textContent = "验证中...";
-
-        try {
-            const response = await fetch("/api/tokens/deepseek/bind", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ api_key: apiKey }),
-            });
-            const data = await response.json();
-
-            if (data.code === 0) {
-                apiKeyInput.value = "";
-                setMessage(data.message || "绑定成功", true);
-                renderDeepSeekAccount(data.data || {});
-                window.appNotify("DeepSeek API Key 已绑定", "success");
-                await loadLogs();
-            } else {
-                setMessage(data.message || "绑定失败", false);
-                window.appNotify(data.message || "绑定失败", "error");
-            }
-        } catch (error) {
-            setMessage("绑定失败，请检查网络或稍后重试", false);
-            window.appNotify("绑定失败，请稍后重试", "error");
-        } finally {
-            bindButton.disabled = false;
-            bindButton.textContent = "绑定并验证";
-        }
-    });
-
-    refreshButton?.addEventListener("click", async () => {
-        refreshButton.disabled = true;
-        refreshButton.textContent = "刷新中...";
-        try {
-            const response = await fetch("/api/tokens/deepseek/refresh", { method: "POST" });
-            const data = await response.json();
-            if (data.code === 0) {
-                renderDeepSeekAccount(data.data || {});
-                setMessage(data.message || "余额已刷新", true);
-                window.appNotify("DeepSeek 真实余额已刷新", "success");
-                await loadLogs();
-            } else {
-                setMessage(data.message || "刷新失败", false);
-                window.appNotify(data.message || "刷新失败", "error");
-            }
-        } catch (error) {
-            setMessage("刷新失败，请稍后重试", false);
-            window.appNotify("刷新失败，请稍后重试", "error");
-        } finally {
-            refreshButton.textContent = "刷新真实余额";
-            await loadDeepSeekStatus();
-        }
-    });
-
-    removeButton?.addEventListener("click", async () => {
-        const confirmed = await window.appConfirm("确认移除已绑定的 DeepSeek API Key？", {
-            message: "移除后本系统将无法继续显示该 Key 的真实余额，需要重新绑定。",
-            confirmText: "移除",
-        });
-        if (!confirmed) {
+    function closeWechatModal() {
+        if (!wechatModal) {
             return;
         }
-        try {
-            const response = await fetch("/api/tokens/deepseek/key", { method: "DELETE" });
-            const data = await response.json();
-            if (data.code === 0) {
-                renderDeepSeekAccount({ is_bound: false });
-                setMessage(data.message || "已移除绑定", true);
-                window.appNotify("已移除 DeepSeek API Key", "success");
-                await loadLogs();
-            } else {
-                setMessage(data.message || "移除失败", false);
-                window.appNotify(data.message || "移除失败", "error");
-            }
-        } catch (error) {
-            setMessage("移除失败，请稍后重试", false);
-            window.appNotify("移除失败，请稍后重试", "error");
+        wechatModal.hidden = true;
+        document.body.classList.remove("modal-open");
+    }
+
+    discountContactButton?.addEventListener("click", openWechatModal);
+    wechatModal?.querySelectorAll("[data-wechat-close]").forEach((element) => {
+        element.addEventListener("click", closeWechatModal);
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && wechatModal && !wechatModal.hidden) {
+            closeWechatModal();
         }
     });
 
-    Promise.all([loadDeepSeekStatus(), loadStats(), loadLogs()]).catch(() => {
+    Promise.all([loadSystemStatus(), loadStats(), loadLogs()]).catch(() => {
         window.appNotify("Token 页面部分数据加载失败", "warning");
     });
 });

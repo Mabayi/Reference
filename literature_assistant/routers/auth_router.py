@@ -28,7 +28,14 @@ async def login(
     password: str = Form(...),
 ):
     login_identifier = (identifier or email or "").strip()
-    user = auth_service.authenticate(login_identifier, password)
+    try:
+        user = auth_service.authenticate(login_identifier, password)
+    except ValueError as error:
+        return templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"error": str(error)},
+        )
     if not user:
         return templates.TemplateResponse(
             request=request,

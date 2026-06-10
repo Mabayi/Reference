@@ -26,6 +26,7 @@
                 <option value="#f8a5c2">浅粉色</option>
             </select>
             <button id="btn-highlight" class="toolbar-btn">添加高亮</button>
+            <button id="btn-clear-page-highlights" class="toolbar-btn toolbar-btn-danger" type="button">清除本页高亮</button>
             <button id="btn-annotate" class="toolbar-btn">添加批注</button>
             <button id="btn-summary" class="toolbar-btn">AI总结PDF</button>
             <span class="toolbar-divider"></span>
@@ -48,7 +49,7 @@
         <aside class="reader-sidebar">
             <div class="reader-sidebar-header">
                 <span class="panel-eyebrow">Annotations</span>
-                <h4>批注与标记</h4>
+                <h4>高亮与批注</h4>
             </div>
             <div class="reader-side-block">
                 <h5>AI 总结</h5>
@@ -61,8 +62,8 @@
                 <p id="translation-empty" class="empty-hint">选中 PDF 文本后可翻译到侧边栏。</p>
             </div>
             <div class="reader-side-block">
-                <h5>批注列表</h5>
-            <div id="annotations-list"><p class="empty-hint">暂时还没有批注</p></div>
+                <h5>高亮与批注列表</h5>
+            <div id="annotations-list"><p class="empty-hint">暂时还没有高亮或批注</p></div>
             </div>
         </aside>
     </div>
@@ -70,5 +71,5 @@
 {% endblock %}
 {% block scripts %}
 <script>window.PAPER_ID = {{ paper.id }};</script>
-<script type="module" src="/static/js/reader.js?v=20260609e"></script>
+<script type="module" src="/static/js/reader.js?v=20260610b"></script>
 {% endblock %}

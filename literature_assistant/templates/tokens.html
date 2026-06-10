@@ -5,12 +5,12 @@
 {% block content %}
 <div class="token-overview">
     <div class="token-balance-card glass-card">
-        <div class="balance-number" id="deepseek-balance">-</div>
-        <div class="balance-label">DeepSeek 真实余额</div>
+        <div class="balance-number" id="local-balance">-</div>
+        <div class="balance-label">我的试用额度</div>
     </div>
     <div class="token-stat-card glass-card">
-        <div class="stat-number" id="deepseek-key-status">未绑定</div>
-        <div class="balance-label">API Key 状态</div>
+        <div class="stat-number" id="system-key-status">检测中</div>
+        <div class="balance-label">系统 Key 状态</div>
     </div>
     <div class="token-stat-card glass-card">
         <div class="stat-number" id="today-cost">-</div>
@@ -26,21 +26,13 @@
     <section class="card glass-card">
         <div class="home-card-header">
             <div>
-                <span class="panel-eyebrow">DeepSeek API</span>
-                <h3>绑定真实 API Key</h3>
+                <span class="panel-eyebrow">System API</span>
+                <h3>系统统一 API / 我的试用额度</h3>
             </div>
         </div>
-        <p class="section-desc">输入 DeepSeek 平台创建的 API Key，系统会调用官方余额接口进行验证，验证成功后显示真实账户余额。</p>
-        <div class="redeem-form">
-            <input type="password" id="deepseek-api-key" placeholder="sk-..." autocomplete="off">
-            <button id="btn-bind-key" class="btn-primary">绑定并验证</button>
-        </div>
-        <div class="token-action-row">
-            <button id="btn-refresh-deepseek" class="btn-secondary" type="button">刷新真实余额</button>
-            <button id="btn-remove-key" class="btn-ghost" type="button">移除绑定</button>
-        </div>
-        <div id="deepseek-account-detail" class="deepseek-account-detail"></div>
-        <p id="deepseek-msg" class="msg"></p>
+        <p class="section-desc">系统已改为统一维护 API Key。新用户注册默认赠送 5 元试用额度，调用 AI 功能时按本地额度扣费。</p>
+        <div id="system-account-detail" class="deepseek-account-detail"></div>
+        <p id="token-msg" class="msg"></p>
     </section>
 
     <section class="card glass-card">
@@ -50,26 +42,51 @@
                 <h3>购买与充值</h3>
             </div>
         </div>
-        <p class="section-desc">本系统不再提供本地虚拟套餐。真实额度以 DeepSeek 官方平台为准，充值后回到本页刷新余额。</p>
+        <p class="section-desc">线上自动支付暂未开通。如需充值或购买更低价额度，请联系客服微信确认价格、到账方式和售后规则。</p>
+        <div class="discount-contact-box">
+            <div>
+                <span class="panel-eyebrow">优惠购买</span>
+                <h4>需要更低价的 API 额度？</h4>
+                <p>联系客服确认当前价格、到账方式和售后规则。</p>
+            </div>
+            <button id="btn-discount-contact" class="btn-primary" type="button">添加客服微信</button>
+        </div>
         <div class="deepseek-link-grid">
-            <a class="package-card deepseek-link-card" href="https://platform.deepseek.com" target="_blank" rel="noopener">
-                <div class="pkg-name">DeepSeek 控制台</div>
-                <p class="pkg-desc">进入官方平台查看账户、用量和充值入口。</p>
-            </a>
-            <a class="package-card deepseek-link-card" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">
-                <div class="pkg-name">创建 API Key</div>
-                <p class="pkg-desc">在官方平台创建用于本系统绑定的密钥。</p>
-            </a>
-            <a class="package-card deepseek-link-card" href="https://platform.deepseek.com/top_up" target="_blank" rel="noopener">
-                <div class="pkg-name">充值购买</div>
-                <p class="pkg-desc">充值后本页刷新即可同步真实余额。</p>
-            </a>
             <a class="package-card deepseek-link-card" href="https://api-docs.deepseek.com/quick_start/pricing" target="_blank" rel="noopener">
-                <div class="pkg-name">价格说明</div>
-                <p class="pkg-desc">查看 DeepSeek 官方模型价格和扣费规则。</p>
+                <div class="pkg-name">官方价格参考</div>
+                <p class="pkg-desc">查看 DeepSeek 官方模型价格，便于对比系统内额度消耗。</p>
             </a>
         </div>
     </section>
+
+    <div id="wechat-contact-modal" class="wechat-modal" hidden>
+        <div class="wechat-modal-backdrop" data-wechat-close></div>
+        <section class="wechat-modal-panel" role="dialog" aria-modal="true" aria-labelledby="wechat-modal-title">
+            <button class="wechat-modal-close" type="button" aria-label="关闭" data-wechat-close>×</button>
+            <div class="wechat-modal-copy">
+                <span class="panel-eyebrow">客服微信</span>
+                <h3 id="wechat-modal-title">添加客服获取优惠额度</h3>
+                <p>扫码后备注“API 额度”，客服会确认当前价格、到账方式和售后规则。</p>
+                <div class="wechat-service-notes">
+                    <span>人工确认</span>
+                    <span>优惠报价</span>
+                    <span>充值售后</span>
+                </div>
+                <button class="btn-secondary" type="button" data-wechat-close>我知道了</button>
+            </div>
+            <div class="wechat-card">
+                <div class="wechat-card-head">
+                    <span class="wechat-card-mark">WX</span>
+                    <div>
+                        <strong>客服二维码</strong>
+                        <small>WeChat Support</small>
+                    </div>
+                </div>
+                <img class="wechat-qr" src="/static/image/wechat-qr.jpg" alt="客服微信二维码">
+                <p class="wechat-card-caption">长按或扫码添加</p>
+            </div>
+        </section>
+    </div>
 
     <section class="card glass-card">
         <div class="home-card-header">
@@ -78,11 +95,11 @@
                 <h3>近 7 天系统用量记录</h3>
             </div>
         </div>
-        <p class="section-desc">这里记录本系统内的绑定、同步和功能消耗行为；真实余额仍以 DeepSeek 官方返回为准。</p>
+        <p class="section-desc">这里记录本地额度赠送、扣费、充值和管理员调整行为。</p>
         <div id="token-logs" class="logs-list"></div>
     </section>
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/tokens.js?v=20260610a"></script>
+<script src="/static/js/tokens.js?v=20260610c"></script>
 {% endblock %}

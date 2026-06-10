@@ -29,6 +29,7 @@ def init_db():
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
                 is_admin INTEGER DEFAULT 0,
+                is_disabled INTEGER DEFAULT 0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 last_login DATETIME
             )
@@ -36,11 +37,14 @@ def init_db():
         columns = {row["name"] for row in conn.execute("PRAGMA table_info(users)").fetchall()}
         if "is_admin" not in columns:
             conn.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0")
+        if "is_disabled" not in columns:
+            conn.execute("ALTER TABLE users ADD COLUMN is_disabled INTEGER DEFAULT 0")
 
         conn.execute(
             """
             UPDATE users
-            SET is_admin = CASE WHEN username = 'admin' THEN 1 ELSE 0 END
+            SET is_admin = CASE WHEN username = 'admin' THEN 1 ELSE 0 END,
+                is_disabled = CASE WHEN username = 'admin' THEN 0 ELSE COALESCE(is_disabled, 0) END
             """
         )
         conn.commit()
@@ -108,11 +112,21 @@ def update_last_login(user_id: int):
         conn.commit()
 
 
+def set_user_disabled(user_id: int, disabled: bool) -> bool:
+    with _get_conn() as conn:
+        cursor = conn.execute(
+            "UPDATE users SET is_disabled = ? WHERE id = ?",
+            (1 if disabled else 0, user_id),
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+
+
 def list_users() -> list[dict]:
     with _get_conn() as conn:
         rows = conn.execute(
             """
-            SELECT id, username, email, is_admin, created_at, last_login
+            SELECT id, username, email, is_admin, is_disabled, created_at, last_login
             FROM users
             ORDER BY created_at DESC
             """

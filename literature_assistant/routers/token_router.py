@@ -5,8 +5,8 @@ from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
+from config.settings import settings
 from repositories import token_repo
-from services import deepseek_account_service
 from utils.auth_utils import require_login
 
 router = APIRouter(prefix="/api/tokens", tags=["Token 管理"])
@@ -35,51 +35,36 @@ async def get_balance(request: Request):
 @router.get("/deepseek/status")
 async def deepseek_status(request: Request):
     user = require_login(request)
-    account = token_repo.get_deepseek_api_key(user["id"])
-    if not account:
-        return {"code": 0, "data": {"is_bound": False}, "message": "未绑定 DeepSeek API Key"}
-    return {"code": 0, "data": account, "message": "ok"}
+    balance = token_repo.get_balance(user["id"])
+    api_key = settings.DEEPSEEK_API_KEY
+    return {
+        "code": 0,
+        "data": {
+            "is_bound": bool(api_key),
+            "key_mask": token_repo.mask_api_key(api_key) if api_key else "",
+            "balance": balance,
+            "billing_cents_per_1000_tokens": str(settings.API_BILLING_CENTS_PER_1000_TOKENS),
+        },
+        "message": "ok" if api_key else "系统 API Key 未配置，请联系管理员",
+    }
 
 
 @router.post("/deepseek/bind")
 async def bind_deepseek_key(request: Request, body: BindDeepSeekKeyRequest):
-    user = require_login(request)
-    balance = token_repo.get_balance(user["id"])
-    if int(balance.get("is_disabled") or 0):
-        return {"code": 1, "data": None, "message": "当前账户 API 使用已被停用，请联系客服"}
-
-    try:
-        remote_balance = await deepseek_account_service.fetch_user_balance(body.api_key)
-    except deepseek_account_service.DeepSeekAccountError as exc:
-        return {"code": 1, "data": None, "message": str(exc)}
-
-    account = token_repo.save_deepseek_api_key(user["id"], body.api_key, remote_balance)
-    return {"code": 0, "data": account, "message": "DeepSeek API Key 已绑定，并已同步真实余额"}
+    require_login(request)
+    return {"code": 1, "data": None, "message": "系统已启用统一 API Key，无需用户绑定个人密钥。"}
 
 
 @router.post("/deepseek/refresh")
 async def refresh_deepseek_balance(request: Request):
-    user = require_login(request)
-    account = token_repo.get_deepseek_api_key(user["id"], include_secret=True)
-    if not account:
-        return {"code": 1, "data": None, "message": "请先绑定 DeepSeek API Key"}
-
-    try:
-        remote_balance = await deepseek_account_service.fetch_user_balance(account["api_key"])
-    except deepseek_account_service.DeepSeekAccountError as exc:
-        return {"code": 1, "data": None, "message": str(exc)}
-
-    updated = token_repo.update_deepseek_balance(user["id"], remote_balance)
-    return {"code": 0, "data": updated, "message": "DeepSeek 真实余额已刷新"}
+    require_login(request)
+    return {"code": 1, "data": None, "message": "系统统一密钥由管理员维护，用户侧无需刷新密钥余额。"}
 
 
 @router.delete("/deepseek/key")
 async def remove_deepseek_key(request: Request):
-    user = require_login(request)
-    ok = token_repo.delete_deepseek_api_key(user["id"])
-    if not ok:
-        return {"code": 1, "data": None, "message": "当前没有已绑定的 DeepSeek API Key"}
-    return {"code": 0, "data": {"is_bound": False}, "message": "已移除 DeepSeek API Key"}
+    require_login(request)
+    return {"code": 1, "data": None, "message": "系统已启用统一 API Key，用户侧不能移除密钥。"}
 
 
 @router.get("/stats")
@@ -109,11 +94,10 @@ async def get_packages(request: Request):
         "code": 0,
         "data": {
             "platform_url": "https://platform.deepseek.com",
-            "api_keys_url": "https://platform.deepseek.com/api_keys",
             "top_up_url": "https://platform.deepseek.com/top_up",
             "pricing_url": "https://api-docs.deepseek.com/quick_start/pricing",
         },
-        "message": "本地虚拟套餐已关闭，请前往 DeepSeek 官方平台购买或充值",
+        "message": "系统使用本地额度计费，如需充值请联系客服",
     }
 
 
@@ -123,7 +107,7 @@ async def redeem(request: Request, body: RedeemRequest):
     return {
         "code": 1,
         "data": None,
-        "message": "本地兑换码已关闭。请绑定真实 DeepSeek API Key，并在 DeepSeek 官方平台充值。",
+        "message": "本地兑换码已关闭。如需充值请在 Token 页面联系客服。",
     }
 
 
@@ -133,8 +117,7 @@ async def purchase(request: Request, body: PurchaseRequest):
     return {
         "code": 1,
         "data": {
-            "top_up_url": "https://platform.deepseek.com/top_up",
-            "platform_url": "https://platform.deepseek.com",
+            "contact": "wechat",
         },
-        "message": "本地虚拟购买已关闭。请前往 DeepSeek 官方平台充值，充值后回到本页刷新真实余额。",
+        "message": "线上自动支付暂未开通。如需充值请添加客服微信。",
     }

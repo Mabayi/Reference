@@ -2,6 +2,7 @@
 import json
 import sqlite3
 from datetime import datetime, timedelta
+from decimal import Decimal, ROUND_CEILING
 
 from config.settings import BASE_DIR, settings
 
@@ -14,6 +15,38 @@ def _mask_api_key(api_key: str) -> str:
     if len(value) <= 14:
         return f"{value[:4]}****"
     return f"{value[:7]}****{value[-6:]}"
+
+
+def mask_api_key(api_key: str) -> str:
+    return _mask_api_key(api_key)
+
+
+def _format_cents(cents: int) -> str:
+    return f"¥{cents / 100:.2f}"
+
+
+def _decorate_balance(data: dict) -> dict:
+    balance_cents = int(data.get("balance") or 0)
+    total_purchased = int(data.get("total_purchased") or 0)
+    total_redeemed = int(data.get("total_redeemed") or 0)
+    data["balance"] = balance_cents
+    data["balance_cents"] = balance_cents
+    data["balance_text"] = _format_cents(balance_cents)
+    data["balance_yuan"] = round(balance_cents / 100, 2)
+    data["total_purchased_text"] = _format_cents(total_purchased)
+    data["total_redeemed_text"] = _format_cents(total_redeemed)
+    return data
+
+
+def calculate_usage_cost_cents(total_tokens: int) -> int:
+    if total_tokens <= 0 or settings.API_BILLING_CENTS_PER_1000_TOKENS <= 0:
+        return 0
+    cost = (
+        Decimal(total_tokens)
+        * settings.API_BILLING_CENTS_PER_1000_TOKENS
+        / Decimal(1000)
+    ).to_integral_value(rounding=ROUND_CEILING)
+    return max(1, int(cost))
 
 
 def _load_balance_infos(value: str | None) -> list[dict]:
@@ -195,14 +228,33 @@ def get_balance(user_id: int) -> dict:
     with _get_conn() as conn:
         row = conn.execute("SELECT * FROM token_balance WHERE user_id = ?", (user_id,)).fetchone()
         if row:
-            return dict(row)
+            return _decorate_balance(dict(row))
 
         conn.execute(
             "INSERT INTO token_balance (user_id, balance, total_purchased, total_redeemed) VALUES (?, 0, 0, 0)",
             (user_id,),
         )
         conn.commit()
-        return {"user_id": user_id, "balance": 0, "total_purchased": 0, "total_redeemed": 0, "is_disabled": 0}
+        return _decorate_balance({"user_id": user_id, "balance": 0, "total_purchased": 0, "total_redeemed": 0, "is_disabled": 0})
+
+
+def grant_signup_credit(user_id: int) -> bool:
+    amount = int(settings.FREE_TRIAL_CREDITS_CENTS or 0)
+    with _get_conn() as conn:
+        existing = conn.execute("SELECT user_id FROM token_balance WHERE user_id = ?", (user_id,)).fetchone()
+        if existing:
+            return False
+        conn.execute(
+            "INSERT INTO token_balance (user_id, balance, total_purchased, total_redeemed) VALUES (?, ?, 0, ?)",
+            (user_id, amount, amount),
+        )
+        if amount > 0:
+            conn.execute(
+                "INSERT INTO token_logs (user_id, action, amount, description) VALUES (?, 'trial_grant', ?, ?)",
+                (user_id, amount, f"新用户注册赠送试用额度：{_format_cents(amount)}"),
+            )
+        conn.commit()
+        return True
 
 
 def is_token_disabled(user_id: int) -> bool:
@@ -210,13 +262,30 @@ def is_token_disabled(user_id: int) -> bool:
     return bool(int(balance.get("is_disabled") or 0))
 
 
+def validate_api_access(user_id: int) -> tuple[bool, str]:
+    balance = get_balance(user_id)
+    if int(balance.get("is_disabled") or 0):
+        return False, "当前账户 API 使用已被管理员停用，请联系客服恢复。"
+    if int(balance.get("balance") or 0) <= 0:
+        return False, "试用额度已用完，请在 Token 页面联系客服充值。"
+    return True, "ok"
+
+
 def record_api_usage(user_id: int, amount: int, description: str = "") -> bool:
-    if amount <= 0:
+    total_tokens = int(amount or 0)
+    cost_cents = calculate_usage_cost_cents(total_tokens)
+    if total_tokens <= 0 or cost_cents <= 0:
         return False
+    get_balance(user_id)
     with _get_conn() as conn:
+        conn.execute("UPDATE token_balance SET balance = balance - ? WHERE user_id = ?", (cost_cents, user_id))
         conn.execute(
             "INSERT INTO token_logs (user_id, action, amount, description) VALUES (?, 'consume', ?, ?)",
-            (user_id, -int(amount), description or "DeepSeek API 真实用量"),
+            (
+                user_id,
+                -cost_cents,
+                f"{description or 'DeepSeek API 调用'}：{total_tokens} tokens，扣费 {_format_cents(cost_cents)}",
+            ),
         )
         conn.commit()
         return True
@@ -276,12 +345,13 @@ def list_all_balances() -> list[dict]:
                 u.username,
                 u.email,
                 u.is_admin,
+                COALESCE(u.is_disabled, 0) AS account_disabled,
                 u.created_at,
                 u.last_login,
                 COALESCE(tb.balance, 0) AS balance,
                 COALESCE(tb.total_purchased, 0) AS total_purchased,
                 COALESCE(tb.total_redeemed, 0) AS total_redeemed,
-                COALESCE(tb.is_disabled, 0) AS is_disabled,
+                COALESCE(tb.is_disabled, 0) AS token_disabled,
                 dk.key_mask AS deepseek_key_mask,
                 COALESCE(dk.is_available, 0) AS deepseek_is_available,
                 dk.balance_infos AS deepseek_balance_infos,
@@ -295,6 +365,10 @@ def list_all_balances() -> list[dict]:
         users: list[dict] = []
         for row in rows:
             item = dict(row)
+            item["is_disabled"] = int(item.get("token_disabled") or 0)
+            item["account_disabled"] = int(item.get("account_disabled") or 0)
+            item["token_disabled"] = int(item.get("token_disabled") or 0)
+            _decorate_balance(item)
             balance_infos = _load_balance_infos(item.pop("deepseek_balance_infos", "[]"))
             item["deepseek_balance_infos"] = balance_infos
             item["deepseek_balance_text"] = _format_balance_infos(balance_infos)

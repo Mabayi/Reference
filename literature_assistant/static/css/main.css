@@ -194,8 +194,8 @@ body.auth-page::before {
     position: fixed;
     inset: 0;
     background:
-        linear-gradient(180deg, rgba(18, 29, 49, 0.6), rgba(10, 17, 30, 0.86)),
-        radial-gradient(circle at top, rgba(111, 163, 244, 0.14), transparent 32%);
+        linear-gradient(180deg, rgba(18, 29, 49, 0.32), rgba(10, 17, 30, 0.58)),
+        radial-gradient(circle at top, rgba(111, 163, 244, 0.2), transparent 34%);
     z-index: 0;
 }
 
@@ -1778,6 +1778,48 @@ button {
     color: #ffd8dd;
 }
 
+.toolbar-btn-danger {
+    border-color: rgba(255, 127, 144, 0.26);
+    background: rgba(255, 127, 144, 0.1);
+    color: #ffd8dd;
+}
+
+body[data-theme="light"] .btn-secondary,
+body[data-theme="light"] .btn-ghost,
+body[data-theme="light"] .toolbar-btn,
+body[data-theme="light"] .icon-action,
+body[data-theme="light"] .zoom-btn,
+body[data-theme="light"] .zoom-fit-btn {
+    background: #ffffff;
+    border-color: rgba(42, 83, 150, 0.32);
+    color: #17345f;
+    box-shadow: 0 8px 18px rgba(35, 72, 128, 0.08);
+}
+
+body[data-theme="light"] .btn-secondary:hover,
+body[data-theme="light"] .btn-ghost:hover,
+body[data-theme="light"] .toolbar-btn:hover,
+body[data-theme="light"] .icon-action:hover,
+body[data-theme="light"] .zoom-btn:hover,
+body[data-theme="light"] .zoom-fit-btn:hover {
+    background: #eef5ff;
+    border-color: rgba(42, 83, 150, 0.46);
+    color: #0f2a50;
+}
+
+body[data-theme="light"] .btn-danger {
+    background: rgba(190, 54, 79, 0.1);
+    border-color: rgba(190, 54, 79, 0.28);
+    color: #9b263d;
+}
+
+body[data-theme="light"] .toolbar-btn-danger {
+    background: rgba(190, 54, 79, 0.08);
+    border-color: rgba(190, 54, 79, 0.32);
+    color: #8f2036;
+    box-shadow: 0 8px 18px rgba(190, 54, 79, 0.08);
+}
+
 .badge {
     display: inline-flex;
     align-items: center;
@@ -2461,6 +2503,33 @@ textarea {
     font-size: 12px;
 }
 
+body[data-theme="light"] .folder-item {
+    color: #2f4668;
+}
+
+body[data-theme="light"] .folder-item:hover,
+body[data-theme="light"] .folder-item.active {
+    background: #eaf2ff;
+    border-color: rgba(42, 83, 150, 0.3);
+    color: #102b52;
+}
+
+body[data-theme="light"] .library-actions .btn-secondary,
+body[data-theme="light"] .library-search .btn-secondary,
+body[data-theme="light"] .paper-row-actions .btn-secondary {
+    background: #f8fbff;
+    border-color: rgba(42, 83, 150, 0.36);
+    color: #14325e;
+    font-weight: 700;
+}
+
+body[data-theme="light"] .paper-row-actions .btn-danger {
+    background: #fff4f6;
+    border-color: rgba(190, 54, 79, 0.34);
+    color: #98243c;
+    font-weight: 700;
+}
+
 @media (max-width: 1320px) {
     .paper-row-card {
         grid-template-columns: minmax(240px, 1fr) minmax(170px, 220px) auto;
@@ -3055,6 +3124,207 @@ textarea {
     margin-top: 12px;
 }
 
+.discount-contact-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 16px 0;
+    margin-bottom: 18px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.discount-contact-box h4 {
+    margin: 4px 0 6px;
+    color: var(--text-primary);
+    font-size: 18px;
+}
+
+.discount-contact-box p {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.wechat-modal[hidden] {
+    display: none;
+}
+
+.wechat-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.wechat-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 6, 12, 0.72);
+    backdrop-filter: blur(14px);
+}
+
+.wechat-modal-panel {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 22px;
+    align-items: center;
+    width: min(760px, 100%);
+    padding: 28px;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 36%),
+        var(--panel-strong);
+    box-shadow: var(--shadow-strong);
+}
+
+.wechat-modal-panel h3 {
+    margin: 6px 0 8px;
+    color: var(--text-primary);
+    font-size: 28px;
+    line-height: 1.16;
+}
+
+.wechat-modal-panel p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.wechat-modal-copy {
+    display: grid;
+    gap: 14px;
+    text-align: left;
+}
+
+.wechat-service-notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.wechat-service-notes span {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--content-well-bg);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.wechat-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--field-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.wechat-card {
+    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #142033;
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.22);
+}
+
+.wechat-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 2px 4px 12px;
+}
+
+.wechat-card-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #142033;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.wechat-card-head strong,
+.wechat-card-head small {
+    display: block;
+}
+
+.wechat-card-head strong {
+    font-size: 14px;
+}
+
+.wechat-card-head small {
+    margin-top: 2px;
+    color: #6b7280;
+    font-size: 11px;
+}
+
+.wechat-qr {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: contain;
+    margin: 0 auto;
+    border: 1px solid rgba(20, 32, 51, 0.08);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.wechat-card-caption {
+    margin-top: 10px;
+    color: #667085 !important;
+    font-size: 12px !important;
+    text-align: center;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+@media (max-width: 760px) {
+    .wechat-modal {
+        padding: 14px;
+    }
+
+    .wechat-modal-panel {
+        grid-template-columns: 1fr;
+        max-height: calc(100vh - 28px);
+        overflow-y: auto;
+        padding: 22px;
+    }
+
+    .wechat-modal-panel h3 {
+        font-size: 24px;
+    }
+
+    .wechat-card {
+        width: min(280px, 100%);
+        justify-self: center;
+    }
+
+    .wechat-modal-copy .btn-secondary {
+        width: 100%;
+    }
+}
+
 .deepseek-account-detail {
     display: grid;
     gap: 12px;
@@ -3320,17 +3590,25 @@ textarea {
 .annotation-overlay {
     position: absolute;
     pointer-events: none;
-    border-radius: 4px;
-    z-index: 6;
+    border-radius: 2px;
+    z-index: 2;
 }
 
 .annotation-highlight {
-    opacity: 0.35;
+    background: var(--highlight-color, #f6e58d);
+    opacity: 0.28;
+    mix-blend-mode: multiply;
+    box-shadow: inset 0 -1px 0 rgba(100, 73, 0, 0.08);
 }
 
 .annotation-note {
-    border: 2px dashed currentColor;
-    background: rgba(255, 255, 255, 0.04);
+    z-index: 3;
+    border: 1px dashed currentColor;
+    background: transparent;
+}
+
+.pdfViewer .textLayer ::selection {
+    background: rgba(91, 141, 255, 0.28);
 }
 
 .reader-sidebar {
@@ -3355,6 +3633,10 @@ textarea {
     margin-bottom: 10px;
     font-size: 15px;
     color: var(--text-primary);
+}
+
+.annotation-item-highlight .ann-type {
+    color: var(--text-secondary);
 }
 
 .reader-side-block .empty-hint {
@@ -3439,11 +3721,19 @@ textarea {
 }
 
 .ann-delete {
-    padding: 0;
+    min-height: 34px;
+    padding: 0 12px;
     color: #ffd1d8;
-    background: none;
-    border: 0;
+    background: rgba(255, 127, 144, 0.08);
+    border: 1px solid rgba(255, 127, 144, 0.18);
+    border-radius: 10px;
     font-size: 13px;
+}
+
+body[data-theme="light"] .ann-delete {
+    color: #9b263d;
+    background: rgba(190, 54, 79, 0.08);
+    border-color: rgba(190, 54, 79, 0.26);
 }
 
 .ann-jump {
@@ -3493,8 +3783,9 @@ textarea {
 
 .auth-showcase {
     background:
-        radial-gradient(circle at top left, rgba(78, 167, 255, 0.22), transparent 32%),
-        radial-gradient(circle at bottom right, rgba(124, 92, 255, 0.16), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 28%),
+        radial-gradient(circle at top left, rgba(78, 167, 255, 0.26), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(124, 92, 255, 0.18), transparent 32%),
         var(--panel-strong);
     display: flex;
     flex-direction: column;
@@ -3544,7 +3835,9 @@ textarea {
     width: 100%;
     max-width: 460px;
     justify-self: end;
-    background: rgba(7, 14, 27, 0.94);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 24%),
+        rgba(12, 22, 40, 0.9);
 }
 
 .auth-header p,
@@ -4790,19 +5083,17 @@ body.admin-console[data-theme="light"] {
         grid-template-columns: 1fr;
     }
 
-    .home-visual-hero {
+    .home-overview-top,
+    .home-overview-grid {
         grid-template-columns: 1fr;
-        min-height: auto;
-        padding: 36px 34px;
-        background-position: center center;
     }
 
-    .home-visual-hero .home-hero-side {
-        padding: 22px;
+    .home-overview-top {
+        align-items: start;
     }
 
-    .home-visual-hero .home-metrics-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .home-overview-top .home-summary-actions {
+        justify-content: flex-start;
     }
 
     .admin-shell {
@@ -4944,16 +5235,12 @@ body.admin-console[data-theme="light"] {
         max-width: none;
     }
 
-    .home-visual-hero {
-        padding: 28px 22px;
+    .home-overview-panel {
+        padding: 20px;
     }
 
-    .home-visual-hero .home-summary-head h2 {
-        font-size: 42px;
-    }
-
-    .home-visual-hero .home-status-stream {
-        grid-template-columns: 1fr;
+    .home-metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .module-grid,
@@ -5068,6 +5355,12 @@ body.admin-console[data-theme="light"] {
     .workbench-hero-side,
     .hero-side-grid {
         grid-template-columns: 1fr;
+    }
+
+    .home-overview-top .home-summary-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
     }
 
     .home-status-item,
