@@ -4,12 +4,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const recentPapersContainer = document.getElementById("home-recent-papers");
     const recentSurveysContainer = document.getElementById("home-recent-surveys");
 
-    function renderMetrics(totalPapers, parsedPapers, surveyCount, deepseekAccount) {
+    function renderMetrics(totalPapers, parsedPapers, surveyCount, systemStatus) {
         const pendingPapers = Math.max(totalPapers - parsedPapers, 0);
-        const keyStatus = deepseekAccount?.is_bound
-            ? (Number(deepseekAccount.is_available || 0) ? "可用" : "不可用")
-            : "未绑定";
-        const balanceText = deepseekAccount?.is_bound ? (deepseekAccount.balance_text || "未同步") : "去绑定";
+        const keyStatus = systemStatus?.is_bound ? "系统 Key 可用" : "系统 Key 未配置";
+        const balanceText = systemStatus?.balance?.balance_text || "¥0.00";
 
         metricsContainer.innerHTML = `
             <div class="home-metric-card">
@@ -28,9 +26,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <small>已保存内容</small>
             </div>
             <div class="home-metric-card">
-                <strong>${window.appEscapeHtml(keyStatus)}</strong>
-                <span>DeepSeek Key</span>
-                <small>${window.appEscapeHtml(balanceText)}</small>
+                <strong>${window.appEscapeHtml(balanceText)}</strong>
+                <span>我的额度</span>
+                <small>${window.appEscapeHtml(keyStatus)}</small>
             </div>
         `;
 
@@ -44,8 +42,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <p>当前共 ${surveyCount} 条记录。</p>
             </div>
             <div class="home-status-item">
-                <span>入口</span>
-                <p>先整理文献，再进入后续模块。</p>
+                <span>额度</span>
+                <p>${window.appEscapeHtml(keyStatus)}，当前额度 ${window.appEscapeHtml(balanceText)}。</p>
             </div>
         `;
     }
@@ -119,10 +117,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const papers = papersData.code === 0 ? (papersData.data || []) : [];
         const surveys = surveysData.code === 0 ? (surveysData.data || []) : [];
-        const deepseekAccount = deepseekData.code === 0 ? (deepseekData.data || {}) : {};
+        const systemStatus = deepseekData.code === 0 ? (deepseekData.data || {}) : {};
         const parsedPapers = papers.filter((paper) => paper.parse_status === "done").length;
 
-        renderMetrics(papers.length, parsedPapers, surveys.length, deepseekAccount);
+        renderMetrics(papers.length, parsedPapers, surveys.length, systemStatus);
         renderRecentPapers(papers);
         renderRecentSurveys(surveys);
     } catch (error) {

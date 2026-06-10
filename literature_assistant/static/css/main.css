@@ -835,7 +835,7 @@ button {
 }
 
 .home-overview-panel {
-    padding: 26px;
+    padding: 24px;
     margin-bottom: 18px;
     border-radius: 0;
     background:
@@ -845,11 +845,11 @@ button {
 
 .home-overview-top {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 24px;
-    align-items: end;
-    padding-bottom: 22px;
-    margin-bottom: 22px;
+    grid-template-columns: minmax(420px, 1fr) auto;
+    gap: 18px;
+    align-items: center;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
     border-bottom: 1px solid var(--border);
 }
 
@@ -864,17 +864,18 @@ button {
 .home-overview-top .home-summary-head p {
     max-width: none;
     font-size: 14px;
-    line-height: 1.65;
+    line-height: 1.55;
 }
 
 .home-overview-top .home-summary-actions {
     margin-top: 0;
     justify-content: flex-end;
+    flex-wrap: nowrap;
 }
 
 .home-overview-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.8fr);
+    grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.72fr);
     gap: 16px;
     align-items: stretch;
 }
@@ -949,6 +950,12 @@ button {
     margin-top: 22px;
 }
 
+.home-summary-actions .btn-primary,
+.home-summary-actions .btn-secondary {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
 .home-summary-tags {
     display: flex;
     flex-wrap: wrap;
@@ -970,15 +977,16 @@ button {
 
 .home-card-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 18px;
+    gap: 14px;
+    margin-bottom: 16px;
 }
 
 .home-card-header h3 {
-    font-size: 22px;
+    font-size: 20px;
     line-height: 1.2;
+    white-space: nowrap;
 }
 
 .home-metrics-grid {
@@ -988,8 +996,8 @@ button {
 }
 
 .home-metric-card {
-    min-height: 128px;
-    padding: 16px;
+    min-height: 116px;
+    padding: 14px;
     border-radius: 0;
     background: var(--content-well-bg);
     border: 1px solid var(--content-well-border);
@@ -997,12 +1005,14 @@ button {
 
 .home-metric-card strong {
     display: block;
-    min-height: 38px;
-    font-size: 32px;
+    min-height: 34px;
+    font-size: 30px;
     line-height: 1.08;
     letter-spacing: 0;
-    margin-bottom: 10px;
-    overflow-wrap: anywhere;
+    margin-bottom: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .home-metric-card span {
@@ -1011,13 +1021,14 @@ button {
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 6px;
+    white-space: nowrap;
 }
 
 .home-metric-card small {
     display: block;
     color: var(--text-secondary);
     font-size: 12px;
-    line-height: 1.65;
+    line-height: 1.45;
 }
 
 .home-status-stream {
@@ -1538,16 +1549,16 @@ button {
 
 .home-list {
     display: grid;
-    gap: 12px;
+    gap: 10px;
 }
 
 .home-list-item {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) minmax(96px, auto);
+    gap: 14px;
     align-items: center;
-    padding: 16px 18px;
-    border-radius: 18px;
+    padding: 14px 16px;
+    border-radius: 16px;
     border: 1px solid rgba(132, 170, 255, 0.1);
     background: rgba(255, 255, 255, 0.03);
     transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
@@ -1562,20 +1573,26 @@ button {
 .home-list-title {
     display: block;
     font-size: 15px;
-    line-height: 1.45;
+    line-height: 1.35;
     margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .home-list-meta {
     color: var(--text-secondary);
     font-size: 13px;
-    line-height: 1.6;
+    line-height: 1.45;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .home-list-side {
     display: grid;
     justify-items: end;
-    gap: 8px;
+    gap: 6px;
     text-align: right;
 }
 
@@ -1595,6 +1612,7 @@ button {
     background: rgba(99, 164, 255, 0.08);
     color: #dceaff;
     font-size: 12px;
+    white-space: nowrap;
 }
 
 .home-empty {
@@ -1693,6 +1711,10 @@ button {
 .tab-btn {
     border: 0;
     border-radius: 16px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, border-color 0.22s ease, color 0.22s ease;
 }
 
@@ -3765,20 +3787,21 @@ body[data-theme="light"] .ann-delete {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 28px;
+    min-height: 100vh;
+    padding: 24px;
 }
 
 .auth-stage {
-    width: min(1220px, 100%);
+    width: min(1280px, 100%);
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(380px, 0.8fr);
+    grid-template-columns: minmax(0, 1.08fr) minmax(430px, 0.78fr);
     gap: 20px;
     align-items: stretch;
 }
 
 .auth-showcase,
 .auth-card {
-    padding: 34px;
+    padding: 32px;
 }
 
 .auth-showcase {
@@ -3793,47 +3816,51 @@ body[data-theme="light"] .ann-delete {
 }
 
 .auth-showcase h2 {
-    font-size: clamp(34px, 4vw, 58px);
-    line-height: 1.05;
-    letter-spacing: -0.05em;
-    max-width: 10ch;
-    margin-bottom: 16px;
+    font-size: clamp(32px, 3vw, 46px);
+    line-height: 1.12;
+    letter-spacing: 0;
+    max-width: 16ch;
+    margin-bottom: 14px;
 }
 
 .auth-showcase p {
     color: var(--text-secondary);
-    max-width: 56ch;
+    max-width: 64ch;
+    line-height: 1.65;
 }
 
 .auth-points {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-    margin-top: 28px;
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 24px;
 }
 
 .auth-point {
-    padding: 18px;
-    border-radius: 20px;
+    min-width: 0;
+    padding: 16px;
+    border-radius: 16px;
     border: 1px solid rgba(132, 170, 255, 0.12);
     background: rgba(255, 255, 255, 0.03);
 }
 
 .auth-point strong {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-size: 15px;
+    white-space: nowrap;
 }
 
 .auth-point span {
     color: var(--text-secondary);
     font-size: 13px;
+    line-height: 1.55;
 }
 
 .auth-card {
     align-self: center;
     width: 100%;
-    max-width: 460px;
+    max-width: 500px;
     justify-self: end;
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 24%),
@@ -3849,6 +3876,7 @@ body[data-theme="light"] .ann-delete {
 .auth-header p {
     font-size: 14px;
     margin-top: 8px;
+    white-space: nowrap;
 }
 
 .auth-form .btn-primary {
