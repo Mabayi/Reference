@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}写作辅助 · Reference System{% endblock %}
+{% block page_eyebrow %}Writing{% endblock %}
+{% block page_title %}写作辅助{% endblock %}
+{% block content %}
+<div class="workbench-main-grid writing-workbench">
+    <section class="glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">输入</span>
+                <h3>写作输入</h3>
+            </div>
+        </div>
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="method">方法描述</button>
+            <button class="tab-btn" data-tab="discussion">结果讨论</button>
+            <button class="tab-btn" data-tab="polish">语言润色</button>
+        </div>
+
+        <div class="tab-content active" id="tab-method">
+            <div class="form-group">
+                <label for="method-content">研究内容</label>
+                <textarea id="method-content" rows="4" placeholder="描述研究对象、模型设计、训练流程或实验步骤"></textarea>
+            </div>
+            <button class="btn-primary writing-generate-btn" data-action="method">生成方法段草稿</button>
+        </div>
+
+        <div class="tab-content" id="tab-discussion">
+            <div class="form-group">
+                <label for="discussion-results">研究结果</label>
+                <textarea id="discussion-results" rows="4" placeholder="描述实验结果、性能差异、异常现象或局限性"></textarea>
+            </div>
+            <button class="btn-primary writing-generate-btn" data-action="discussion">生成讨论段草稿</button>
+        </div>
+
+        <div class="tab-content" id="tab-polish">
+            <div class="form-group">
+                <label for="polish-text">待润色文本</label>
+                <textarea id="polish-text" rows="5" placeholder="粘贴需要改写或学术化润色的段落"></textarea>
+            </div>
+            <button class="btn-primary writing-generate-btn" data-action="polish">开始润色</button>
+        </div>
+    </section>
+
+    <section class="ai-output-panel writing-output glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">结果</span>
+                <h3>结果输出</h3>
+            </div>
+            <button id="btn-copy-writing" class="btn-secondary">复制文本</button>
+        </div>
+        <div id="writing-result" class="output-area"></div>
+        <p class="word-count" id="word-count"></p>
+    </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/writing.js?v=20260608i"></script>
+{% endblock %}

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#06101d">
+    <title>管理后台 · Reference System</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=20260610e">
+</head>
+<body class="admin-console">
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <a href="/admin" class="admin-brand">
+                <span class="admin-brand-mark">AD</span>
+                <span>
+                    <strong>系统后台</strong>
+                    <small>Reference System Admin</small>
+                </span>
+            </a>
+
+            <nav class="admin-console-nav">
+                <button class="admin-nav-item active" type="button" data-admin-tab="analytics">
+                    <span>统计</span>
+                    <strong>使用面板</strong>
+                </button>
+                <button class="admin-nav-item" type="button" data-admin-tab="users">
+                    <span>用户</span>
+                    <strong>账户管理</strong>
+                </button>
+                <button class="admin-nav-item" type="button" data-admin-tab="tickets">
+                    <span>工单</span>
+                    <strong>问题处理</strong>
+                </button>
+                <button class="admin-nav-item" type="button" data-admin-tab="tokens">
+                    <span>Token</span>
+                    <strong>API 控制</strong>
+                </button>
+                <button class="admin-nav-item" type="button" data-admin-tab="logs">
+                    <span>流水</span>
+                    <strong>使用记录</strong>
+                </button>
+            </nav>
+
+            <div class="admin-sidebar-footer">
+                <a href="/logout" class="btn-ghost">退出登录</a>
+            </div>
+        </aside>
+
+        <main class="admin-console-main">
+            <header class="admin-console-topbar">
+                <div>
+                    <span class="admin-console-kicker">ADMIN CONSOLE</span>
+                    <h1>系统管理后台</h1>
+                    <p>集中处理用户工单、DeepSeek API 状态和服务反馈。</p>
+                </div>
+                <div class="admin-console-actions">
+                    <button class="theme-toggle" type="button" onclick="window.toggleTheme()" aria-label="切换深色和浅色模式">
+                        <span id="theme-icon" class="theme-icon">🌙</span>
+                        <span id="theme-label">深色模式</span>
+                    </button>
+                    <div class="admin-user-card">
+                        <span>{{ user.username[0] | upper }}</span>
+                        <div>
+                            <small>管理员</small>
+                            <strong>{{ user.username }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <section class="admin-console-overview" id="admin-overview"></section>
+
+            <section class="admin-panel admin-console-panel active" id="admin-tab-analytics">
+                <div class="admin-panel-header">
+                    <div>
+                        <span>USAGE</span>
+                        <h2>系统使用统计</h2>
+                    </div>
+                    <button class="btn-secondary" id="btn-refresh-usage" type="button">刷新数据</button>
+                </div>
+                <div class="admin-usage-summary" id="usage-summary"></div>
+                <div class="admin-analytics-grid">
+                    <article class="admin-chart-card wide">
+                        <div class="admin-chart-head">
+                            <div>
+                                <span>最近 7 天</span>
+                                <h3>DeepSeek API 用量趋势</h3>
+                            </div>
+                            <strong id="usage-recent-consumed">-</strong>
+                        </div>
+                        <div class="admin-chart-stage" id="usage-token-trend"></div>
+                    </article>
+
+                    <article class="admin-chart-card">
+                        <div class="admin-chart-head">
+                            <div>
+                                <span>账户增长</span>
+                                <h3>新增用户</h3>
+                            </div>
+                        </div>
+                        <div class="admin-chart-stage compact" id="usage-user-growth"></div>
+                    </article>
+
+                    <article class="admin-chart-card">
+                        <div class="admin-chart-head">
+                            <div>
+                                <span>流水结构</span>
+                                <h3>API 操作类型</h3>
+                            </div>
+                        </div>
+                        <div class="admin-chart-stage compact" id="usage-token-actions"></div>
+                    </article>
+
+                    <article class="admin-chart-card wide">
+                        <div class="admin-chart-head">
+                            <div>
+                                <span>用户排行</span>
+                                <h3>API 用量与活跃度</h3>
+                            </div>
+                        </div>
+                        <div class="admin-chart-stage" id="usage-top-users"></div>
+                    </article>
+
+                    <article class="admin-chart-card">
+                        <div class="admin-chart-head">
+                            <div>
+                                <span>工单状态</span>
+                                <h3>问题处理分布</h3>
+                            </div>
+                        </div>
+                        <div class="admin-chart-stage compact" id="usage-ticket-status"></div>
+                    </article>
+
+                    <article class="admin-chart-card">
+                        <div class="admin-chart-head">
+                            <div>
+                                <span>客服反馈</span>
+                                <h3>情绪与分类</h3>
+                            </div>
+                        </div>
+                        <div class="admin-chart-stage compact" id="usage-ticket-insight"></div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="admin-panel admin-console-panel" id="admin-tab-users">
+                <div class="admin-panel-header">
+                    <div>
+                        <span>USERS</span>
+                        <h2>用户账户管理</h2>
+                    </div>
+                </div>
+                <div id="admin-user-list"></div>
+            </section>
+
+            <section class="admin-panel admin-console-panel" id="admin-tab-tickets">
+                <div class="admin-panel-header">
+                    <div>
+                        <span>SUPPORT</span>
+                        <h2>用户疑问与工单</h2>
+                    </div>
+                    <select id="ticket-status-filter" class="admin-filter-select">
+                        <option value="all">全部状态</option>
+                        <option value="open">待处理</option>
+                        <option value="in_progress">处理中</option>
+                        <option value="resolved">已解决</option>
+                        <option value="closed">已关闭</option>
+                    </select>
+                </div>
+                <div id="admin-ticket-list" class="admin-ticket-list"></div>
+            </section>
+
+            <section class="admin-panel admin-console-panel" id="admin-tab-tokens">
+                <div class="admin-panel-header">
+                    <div>
+                        <span>TOKEN</span>
+                        <h2>用户 DeepSeek API 状态</h2>
+                    </div>
+                </div>
+                <div id="admin-token-users"></div>
+            </section>
+
+            <section class="admin-panel admin-console-panel" id="admin-tab-logs">
+                <div class="admin-panel-header">
+                    <div>
+                        <span>LOGS</span>
+                        <h2>DeepSeek API 使用记录</h2>
+                    </div>
+                </div>
+                <div id="admin-token-logs"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/js/main.js?v=20260609f"></script>
+    <script src="/static/js/admin.js?v=20260610f"></script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}首页 · Reference System{% endblock %}
+{% block page_eyebrow %}总览{% endblock %}
+{% block page_title %}研究工作台{% endblock %}
+{% block content %}
+<section class="home-hero-card glass-card">
+    <div class="home-hero-main">
+        <div class="home-summary-head">
+            <h2>研究总览</h2>
+            <p>{{ user.username }}，这里汇总当前资料和最近记录。</p>
+        </div>
+
+        <div class="home-summary-actions">
+            <a href="/papers" class="btn-primary">文献库</a>
+            <a href="/survey" class="btn-secondary">综述</a>
+            <a href="/dashboard" class="btn-secondary">趋势</a>
+        </div>
+
+    </div>
+
+    <div class="home-hero-side">
+        <div class="home-card-header">
+            <div>
+                <h3>资料状态</h3>
+            </div>
+        </div>
+
+        <div class="home-metrics-grid" id="home-overview-metrics">
+            <div class="home-metric-card">
+                <strong>--</strong>
+                <span>总文献数</span>
+                <small>正在加载</small>
+            </div>
+            <div class="home-metric-card">
+                <strong>--</strong>
+                <span>已解析</span>
+                <small>正在加载</small>
+            </div>
+            <div class="home-metric-card">
+                <strong>--</strong>
+                <span>综述记录</span>
+                <small>正在加载</small>
+            </div>
+            <div class="home-metric-card">
+                <strong>--</strong>
+                <span>DeepSeek Key</span>
+                <small>正在加载</small>
+            </div>
+        </div>
+
+        <div class="home-status-stream" id="home-overview-status">
+            <div class="home-status-item">
+                <span>状态</span>
+                <p>正在同步当前账户数据。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="home-record-grid">
+    <section class="home-record-card glass-card">
+        <div class="home-card-header">
+            <div>
+                <h3>最近文献</h3>
+            </div>
+            <a href="/papers" class="btn-secondary">查看全部</a>
+        </div>
+        <div class="home-list" id="home-recent-papers"></div>
+    </section>
+
+    <section class="home-record-card glass-card">
+        <div class="home-card-header">
+            <div>
+                <h3>最近综述记录</h3>
+            </div>
+            <a href="/survey" class="btn-secondary">进入综述页</a>
+        </div>
+        <div class="home-list" id="home-recent-surveys"></div>
+    </section>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/home.js?v=20260610a"></script>
+{% endblock %}

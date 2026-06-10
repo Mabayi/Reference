@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+.venv/
+venv/
+env/
+ENV/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.crt
+
+# Runtime data
+literature_assistant/instance/
+literature_assistant/uploads/
+literature_assistant/exports/
+literature_assistant/vector_store/
+
+# Logs
+*.log
+*.out
+*.err
+uvicorn*.out
+uvicorn*.err
+uvicorn*.log
+
+# Editor and OS
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini

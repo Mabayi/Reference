@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}代码辅助 · Reference System{% endblock %}
+{% block page_eyebrow %}Code Generation{% endblock %}
+{% block page_title %}代码辅助{% endblock %}
+{% block content %}
+<div class="workbench-main-grid codegen-workbench">
+    <section class="codegen-form control-panel glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">输入</span>
+                <h3>任务说明</h3>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="exp-summary">实验或分析说明</label>
+            <textarea id="exp-summary" rows="4" placeholder="例如：对两组医学图像分割指标进行显著性检验，并输出箱线图"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>输出语言</label>
+            <div class="radio-group">
+                <label><input type="radio" name="language" value="python" checked> Python</label>
+                <label><input type="radio" name="language" value="r"> R</label>
+            </div>
+        </div>
+
+        <button id="btn-codegen" class="btn-primary">生成代码草稿</button>
+    </section>
+
+    <section class="ai-output-panel code-output glass-card">
+        <div class="code-header">
+            <span id="code-lang-label">Python</span>
+            <button id="btn-copy-code" class="btn-secondary">复制代码</button>
+        </div>
+        <pre><code id="code-result"></code></pre>
+    </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/codegen.js?v=20260608i"></script>
+{% endblock %}

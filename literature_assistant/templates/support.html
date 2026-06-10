@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}客服中心 · Reference System{% endblock %}
+{% block page_eyebrow %}Support{% endblock %}
+{% block page_title %}客服中心{% endblock %}
+{% block content %}
+<div class="support-layout">
+    <section class="support-submit-panel glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">提交问题</span>
+                <h3>联系客服</h3>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>常见问题</label>
+            <div id="support-faqs" class="support-faq-grid"></div>
+        </div>
+
+        <div id="support-faq-answer" class="support-answer-panel" hidden>
+            <strong>固定解答</strong>
+            <p id="support-faq-answer-text"></p>
+        </div>
+
+        <div class="form-group">
+            <label for="support-subject">问题标题</label>
+            <input type="text" id="support-subject" placeholder="例如：文献解析完成后摘要字体看不清">
+        </div>
+
+        <div class="form-group">
+            <label for="support-message">问题描述</label>
+            <textarea id="support-message" rows="6" placeholder="请描述你遇到的问题、所在页面、操作步骤和期望结果"></textarea>
+        </div>
+
+        <div class="support-action-row">
+            <button id="btn-ask-ai" class="btn-primary" type="button">询问 AI 并创建工单</button>
+            <button id="btn-submit-ticket" class="btn-secondary" type="button">提交人工工单</button>
+        </div>
+
+        <div id="support-ai-result" class="support-ai-result" hidden></div>
+    </section>
+
+    <section class="support-history-panel glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">记录</span>
+                <h3>我的工单</h3>
+            </div>
+        </div>
+        <div id="support-ticket-list" class="support-ticket-list"></div>
+    </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/support.js?v=20260610a"></script>
+{% endblock %}

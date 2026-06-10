@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 · Reference System</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=20260610d">
+</head>
+<body class="auth-page">
+    <div class="auth-stage">
+        <section class="auth-showcase">
+            <div>
+                <div class="panel-badge">Reference System</div>
+                <h2>把零散页面，改成一个像样的研究系统。</h2>
+                <p>围绕文献整理、知识生成、实验规划与论文写作构建的统一研究界面。</p>
+            </div>
+
+            <div class="auth-points">
+                <div class="auth-point">
+                    <strong>文献工作流</strong>
+                    <span>上传、解析、阅读和引用整理统一到同一系统里。</span>
+                </div>
+                <div class="auth-point">
+                    <strong>写作辅助</strong>
+                    <span>综述、实验设计和写作输出保持一致的操作方式。</span>
+                </div>
+                <div class="auth-point">
+                    <strong>展示表达</strong>
+                    <span>更适合课程汇报、项目答辩和研究系统展示场景。</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="auth-card">
+            <div class="auth-header">
+                <h1>登录系统</h1>
+                <p>进入本地部署的研究工作台</p>
+            </div>
+
+            {% if error %}
+            <div class="auth-error">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST" action="/login" class="auth-form">
+                <div class="form-group">
+                    <label for="identifier">用户名或邮箱</label>
+                    <input type="text" id="identifier" name="identifier" required placeholder="请输入用户名或邮箱" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" required placeholder="请输入密码" autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn-primary">登录</button>
+            </form>
+
+            <div class="auth-footer">
+                还没有账号？<a href="/register">立即注册</a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

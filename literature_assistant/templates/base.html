@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#06101d">
+    <title>{% block title %}Reference System{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=20260610d">
+    {% block head %}{% endblock %}
+</head>
+<body class="page-{{ active_page or 'app' }}">
+    <div class="scene-backdrop" id="scene-backdrop" aria-hidden="true">
+        <canvas class="scene-canvas" id="scene-canvas"></canvas>
+        <div class="scene-gradient scene-gradient-a"></div>
+        <div class="scene-gradient scene-gradient-b"></div>
+        <div class="scene-gradient scene-gradient-c"></div>
+        <div class="scene-orbit scene-orbit-a"></div>
+        <div class="scene-orbit scene-orbit-b"></div>
+        <div class="scene-grid"></div>
+        <div class="scene-vignette"></div>
+    </div>
+    <div class="app-shell" id="app-shell">
+        <div class="app-overlay" id="app-overlay"></div>
+
+        <aside class="sidebar" id="app-sidebar">
+            <a href="/" class="brand-card">
+                <span class="brand-mark">RS</span>
+                <span class="brand-copy">
+                    <span class="brand-kicker">Academic Workspace</span>
+                    <strong>研究工作台</strong>
+                    <span>文献、综述、实验与写作的一体化界面</span>
+                </span>
+            </a>
+
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item {% if active_page == 'home' %}active{% endif %}">
+                    <span class="nav-icon">HM</span>
+                    <span class="nav-text-group">
+                        <strong>首页</strong>
+                    </span>
+                </a>
+
+                <a href="/papers" class="nav-item {% if active_page == 'papers' %}active{% endif %}">
+                    <span class="nav-icon">LB</span>
+                    <span class="nav-text-group">
+                        <strong>文献库</strong>
+                    </span>
+                </a>
+
+                <a href="/survey" class="nav-item {% if active_page == 'survey' %}active{% endif %}">
+                    <span class="nav-icon">SV</span>
+                    <span class="nav-text-group">
+                        <strong>综述生成</strong>
+                    </span>
+                </a>
+
+                <a href="/experiment" class="nav-item {% if active_page == 'experiment' %}active{% endif %}">
+                    <span class="nav-icon">EX</span>
+                    <span class="nav-text-group">
+                        <strong>实验设计</strong>
+                    </span>
+                </a>
+
+                <a href="/codegen" class="nav-item {% if active_page == 'codegen' %}active{% endif %}">
+                    <span class="nav-icon">CG</span>
+                    <span class="nav-text-group">
+                        <strong>代码辅助</strong>
+                    </span>
+                </a>
+
+                <a href="/writing" class="nav-item {% if active_page == 'writing' %}active{% endif %}">
+                    <span class="nav-icon">WR</span>
+                    <span class="nav-text-group">
+                        <strong>写作辅助</strong>
+                    </span>
+                </a>
+
+                <a href="/citation" class="nav-item {% if active_page == 'citation' %}active{% endif %}">
+                    <span class="nav-icon">CT</span>
+                    <span class="nav-text-group">
+                        <strong>引用管理</strong>
+                    </span>
+                </a>
+
+                <a href="/dashboard" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                    <span class="nav-icon">DS</span>
+                    <span class="nav-text-group">
+                        <strong>趋势大屏</strong>
+                    </span>
+                </a>
+
+                <a href="/tokens" class="nav-item {% if active_page == 'tokens' %}active{% endif %}">
+                    <span class="nav-icon">TK</span>
+                    <span class="nav-text-group">
+                        <strong>Token 管理</strong>
+                    </span>
+                </a>
+
+                <a href="/support" class="nav-item {% if active_page == 'support' %}active{% endif %}">
+                    <span class="nav-icon">SP</span>
+                    <span class="nav-text-group">
+                        <strong>客服中心</strong>
+                    </span>
+                </a>
+
+                {% if user and user.username == 'admin' %}
+                <a href="/admin" class="nav-item {% if active_page == 'admin' %}active{% endif %}">
+                    <span class="nav-icon">AD</span>
+                    <span class="nav-text-group">
+                        <strong>管理后台</strong>
+                    </span>
+                </a>
+                {% endif %}
+            </nav>
+
+            <div class="sidebar-footer">
+                {% if user %}
+                <a href="/logout" class="btn-ghost">退出登录</a>
+                {% endif %}
+            </div>
+        </aside>
+
+        <div class="main-wrapper">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="切换导航">
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <div>
+                        <h1 class="topbar-title">{% block page_title %}{% endblock %}</h1>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="topbar-actions">
+                        <button class="theme-toggle" type="button" onclick="window.toggleTheme()" aria-label="切换深色和浅色模式">
+                            <span id="theme-icon" class="theme-icon">🌙</span>
+                            <span id="theme-label">深色模式</span>
+                        </button>
+                        {% block topbar_actions %}{% endblock %}
+                    </div>
+                    {% if user %}
+                    <div class="user-pill">
+                        <span class="user-avatar">{{ user.username[0] | upper }}</span>
+                        <span>
+                            <span class="user-pill-label">当前账户</span>
+                            <strong>{{ user.username }}</strong>
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </header>
+
+            <main class="page-content">
+                <div class="page-frame">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js?v=20260609f"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+jinja2
+aiofiles
+httpx
+bcrypt
+itsdangerous
+python-multipart
+pymupdf

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}文献库 · Reference System{% endblock %}
+{% block page_eyebrow %}Library{% endblock %}
+{% block page_title %}文献管理{% endblock %}
+{% block content %}
+<div class="library-browser">
+    <aside class="library-sidebar">
+        <div class="library-sidebar-head">
+            <div>
+                <span class="section-kicker">Folders</span>
+                <h3>文献目录</h3>
+            </div>
+            <button id="btn-new-folder" class="icon-action" type="button" title="新建文件夹">+</button>
+        </div>
+        <div class="folder-tree" id="folder-tree"></div>
+    </aside>
+
+    <section class="library-main">
+        <div class="library-main-head">
+            <div class="library-title-block">
+                <span class="section-kicker">Current View</span>
+                <h3 id="library-title">全部文献</h3>
+                <p id="library-subtitle">支持搜索、阅读、重命名和删除</p>
+            </div>
+            <div class="library-actions">
+                <button id="btn-upload-file" class="btn-primary" type="button">上传 PDF</button>
+                <button id="btn-upload-folder" class="btn-secondary" type="button">上传文件夹</button>
+            </div>
+        </div>
+
+        <div class="library-filter-row">
+            <div class="library-search">
+                <input id="paper-search" type="search" placeholder="搜索标题、作者、关键词、文件夹">
+                <button id="btn-search" class="btn-secondary" type="button">搜索</button>
+            </div>
+            <div class="drop-strip" id="upload-area">
+                <input type="file" id="file-input" accept=".pdf" hidden>
+                <input type="file" id="folder-input" accept=".pdf" webkitdirectory directory multiple hidden>
+                <span class="drop-strip-icon">PDF</span>
+                <span class="upload-text"><span id="upload-message">拖拽 PDF 到这里上传到</span> <strong id="current-folder-label">未归档</strong></span>
+            </div>
+        </div>
+
+        <div class="paper-list-shell" id="paper-list"></div>
+    </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/papers.js?v=20260609k"></script>
+{% endblock %}

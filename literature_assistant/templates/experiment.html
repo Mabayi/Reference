@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}实验设计 · Reference System{% endblock %}
+{% block page_eyebrow %}Experiment{% endblock %}
+{% block page_title %}实验设计{% endblock %}
+{% block content %}
+<div class="workbench-main-grid experiment-workbench">
+    <section class="control-panel glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">输入</span>
+                <h3>研究输入</h3>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="field-label-row">
+                <label for="goal">研究目标</label>
+                <button id="btn-recommend-goal" class="btn-secondary field-ai-btn" type="button">AI生成</button>
+            </div>
+            <textarea id="goal" rows="4" placeholder="例如：比较改进的 YOLO 模型在无人机航拍小目标检测中的性能差异"></textarea>
+        </div>
+
+        <div class="form-group">
+            <div class="field-label-row">
+                <label for="hypothesis">研究假设（可选）</label>
+                <button id="btn-recommend-hypothesis" class="btn-secondary field-ai-btn" type="button">AI生成</button>
+            </div>
+            <textarea id="hypothesis" rows="3" placeholder="例如：加入轻量化注意力模块后，精度提升主要来自复杂背景下的判别能力增强"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>选择参考文献（可选，只能选择一篇）</label>
+            <div id="experiment-paper-options" class="checkbox-list"></div>
+        </div>
+
+        <button id="btn-design" class="btn-primary">生成实验草案</button>
+    </section>
+
+    <section class="ai-output-panel result-panel glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">结果</span>
+                <h3>方案结果</h3>
+            </div>
+        </div>
+
+        <div id="experiment-result" class="experiment-result"></div>
+        <div id="flow-steps-container" class="mermaid-container"></div>
+    </section>
+</div>
+
+<section class="glass-card">
+    <div class="home-card-header">
+        <div>
+            <span class="panel-eyebrow">历史</span>
+            <h3>最近实验草案</h3>
+        </div>
+    </div>
+    <div id="experiment-history"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/experiment.js?v=20260609b"></script>
+{% endblock %}

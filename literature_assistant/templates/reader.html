@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}阅读 · {{ paper.title or paper.filename }}{% endblock %}
+{% block page_eyebrow %}Reader{% endblock %}
+{% block page_title %}{{ paper.title or paper.filename }}{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/vendor/pdfjs/pdf_viewer.min.css">
+{% endblock %}
+{% block content %}
+<div class="reader-layout">
+    <div class="reader-toolbar">
+        <div class="toolbar-left">
+            <a href="/papers" class="btn-secondary">返回文献库</a>
+            <span class="reader-info">总页数：<span id="total-pages">-</span></span>
+            <div class="reader-zoom-controls" aria-label="PDF缩放">
+                <button id="btn-zoom-out" class="zoom-btn" type="button">-</button>
+                <span id="zoom-level" class="zoom-level">适宽</span>
+                <button id="btn-zoom-in" class="zoom-btn" type="button">+</button>
+                <button id="btn-fit-width" class="zoom-fit-btn" type="button">适宽</button>
+            </div>
+        </div>
+        <div class="toolbar-right">
+            <select id="highlight-color" class="toolbar-select">
+                <option value="#f6e58d">高亮黄</option>
+                <option value="#a8e6cf">薄荷绿</option>
+                <option value="#a8d8ea">冷静蓝</option>
+                <option value="#f8a5c2">浅粉色</option>
+            </select>
+            <button id="btn-highlight" class="toolbar-btn">添加高亮</button>
+            <button id="btn-annotate" class="toolbar-btn">添加批注</button>
+            <button id="btn-summary" class="toolbar-btn">AI总结PDF</button>
+            <span class="toolbar-divider"></span>
+            <select id="translate-lang" class="toolbar-select">
+                <option value="zh">翻译为中文</option>
+                <option value="en">翻译为英文</option>
+                <option value="ja">翻译为日文</option>
+            </select>
+            <button id="btn-translate" class="toolbar-btn">翻译选中文本</button>
+        </div>
+    </div>
+
+    <div class="reader-body">
+        <div class="reader-main" id="reader-content">
+            <div class="pdf-shell" id="pdf-shell">
+                <div class="reader-loading">PDF加载中...</div>
+            </div>
+        </div>
+
+        <aside class="reader-sidebar">
+            <div class="reader-sidebar-header">
+                <span class="panel-eyebrow">Annotations</span>
+                <h4>批注与标记</h4>
+            </div>
+            <div class="reader-side-block">
+                <h5>AI 总结</h5>
+                <div id="summary-box" class="ann-note" style="display:none;"></div>
+                <p id="summary-empty" class="empty-hint">点击“AI总结PDF”生成内容。</p>
+            </div>
+            <div class="reader-side-block">
+                <h5>选区翻译</h5>
+                <div id="translation-box" class="ann-note" style="display:none;"></div>
+                <p id="translation-empty" class="empty-hint">选中 PDF 文本后可翻译到侧边栏。</p>
+            </div>
+            <div class="reader-side-block">
+                <h5>批注列表</h5>
+            <div id="annotations-list"><p class="empty-hint">暂时还没有批注</p></div>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>window.PAPER_ID = {{ paper.id }};</script>
+<script type="module" src="/static/js/reader.js?v=20260609e"></script>
+{% endblock %}

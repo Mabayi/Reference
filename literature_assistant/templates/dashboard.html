@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}趋势大屏 · Reference System{% endblock %}
+{% block page_eyebrow %}Dashboard{% endblock %}
+{% block page_title %}趋势大屏{% endblock %}
+{% block content %}
+<div class="stats-cards" id="stats-cards"></div>
+
+<div class="dashboard-grid">
+    <section class="chart-container dashboard-chart-card trend-card glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">年份</span>
+                <h3>年度文献分布</h3>
+                <p class="panel-subtitle">基于已入库文献的年份字段实时统计</p>
+            </div>
+        </div>
+        <div class="chart-stage trend-stage" id="trend-chart"><p class="empty-hint">趋势图加载中...</p></div>
+    </section>
+
+    <section class="chart-container dashboard-chart-card keyword-card glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">关键词</span>
+                <h3>关键词频次</h3>
+                <p class="panel-subtitle">统计解析完成文献中的关键词出现次数</p>
+            </div>
+        </div>
+        <div class="chart-stage keyword-stage" id="keyword-cloud"><p class="empty-hint">关键词结构加载中...</p></div>
+    </section>
+</div>
+
+<section class="top-papers-section glass-card">
+    <div class="home-card-header">
+        <div>
+            <span class="panel-eyebrow">文献</span>
+            <h3>最新入库文献</h3>
+        </div>
+    </div>
+    <div id="top-papers"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/dashboard.js?v=20260609b"></script>
+{% endblock %}

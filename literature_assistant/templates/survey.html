@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}综述生成 · Reference System{% endblock %}
+{% block page_eyebrow %}Survey{% endblock %}
+{% block page_title %}综述生成{% endblock %}
+{% block content %}
+<div class="workbench-main-grid survey-workbench">
+    <section class="survey-form control-panel glass-card">
+        <div class="home-card-header">
+            <div>
+                <h3>生成设置</h3>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="topic">研究主题</label>
+            <div class="topic-input-row">
+                <input type="text" id="topic" placeholder="例如：遥感图像中的小目标检测方法综述">
+                <button id="btn-recommend-topic" class="btn-secondary" type="button">AI生成</button>
+            </div>
+            <div id="topic-recommendation" class="topic-recommendation" style="display:none;"></div>
+        </div>
+
+        <div class="form-group">
+            <label>选择参考文献（可选）</label>
+            <div id="paper-checkboxes" class="checkbox-list"></div>
+        </div>
+
+        <button id="btn-generate" class="btn-primary" disabled>开始生成综述草稿</button>
+    </section>
+
+    <section class="survey-result ai-output-panel result-panel glass-card">
+        <div class="home-card-header">
+            <div>
+                <h3>草稿预览</h3>
+            </div>
+        </div>
+
+        <div class="survey-output-shell is-collapsed" id="survey-output-shell">
+            <div id="survey-output" class="output-area survey-output"></div>
+            <div class="survey-output-fade" aria-hidden="true"></div>
+        </div>
+        <div id="survey-actions" class="actions-bar" style="display:none;">
+            <button id="btn-toggle-survey" class="btn-secondary" type="button">展开全文</button>
+            <button id="btn-copy-survey" class="btn-secondary">复制内容</button>
+        </div>
+    </section>
+</div>
+
+<section class="survey-history glass-card">
+    <div class="home-card-header">
+        <div>
+            <h3>历史记录</h3>
+        </div>
+    </div>
+    <div id="history-list"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/survey.js?v=20260609e"></script>
+{% endblock %}

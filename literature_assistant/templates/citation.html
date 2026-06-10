@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}引用管理 · Reference System{% endblock %}
+{% block page_eyebrow %}Citation{% endblock %}
+{% block page_title %}引用管理{% endblock %}
+{% block content %}
+<div class="workbench-main-grid citation-workbench">
+    <section class="citation-form control-panel glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">选择</span>
+                <h3>文献与格式</h3>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>选择文献</label>
+            <div id="citation-papers" class="checkbox-list"></div>
+        </div>
+
+        <div class="form-group">
+            <label>输出格式</label>
+            <div class="radio-group">
+                <label><input type="radio" name="style" value="gbt" checked> GB/T 7714</label>
+                <label><input type="radio" name="style" value="apa"> APA</label>
+                <label><input type="radio" name="style" value="ieee"> IEEE</label>
+                <label><input type="radio" name="style" value="mla"> MLA</label>
+            </div>
+        </div>
+
+        <button id="btn-format" class="btn-primary">生成引用列表</button>
+    </section>
+
+    <section class="citation-output glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">结果</span>
+                <h3>参考文献输出</h3>
+            </div>
+            <button id="btn-copy-cite" class="btn-secondary">复制全部</button>
+        </div>
+        <pre id="citation-result" class="output-area"></pre>
+        <div class="actions-bar">
+            <button id="btn-export" class="btn-secondary" style="display:none;">导出 TXT</button>
+        </div>
+    </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/citation.js?v=20260608n"></script>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Token 管理 · Reference System{% endblock %}
+{% block page_eyebrow %}Token Management{% endblock %}
+{% block page_title %}Token 管理{% endblock %}
+{% block content %}
+<div class="token-overview">
+    <div class="token-balance-card glass-card">
+        <div class="balance-number" id="deepseek-balance">-</div>
+        <div class="balance-label">DeepSeek 真实余额</div>
+    </div>
+    <div class="token-stat-card glass-card">
+        <div class="stat-number" id="deepseek-key-status">未绑定</div>
+        <div class="balance-label">API Key 状态</div>
+    </div>
+    <div class="token-stat-card glass-card">
+        <div class="stat-number" id="today-cost">-</div>
+        <div class="balance-label">今日系统用量</div>
+    </div>
+    <div class="token-stat-card glass-card">
+        <div class="stat-number" id="week-cost">-</div>
+        <div class="balance-label">近 7 天系统用量</div>
+    </div>
+</div>
+
+<div class="token-sections">
+    <section class="card glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">DeepSeek API</span>
+                <h3>绑定真实 API Key</h3>
+            </div>
+        </div>
+        <p class="section-desc">输入 DeepSeek 平台创建的 API Key，系统会调用官方余额接口进行验证，验证成功后显示真实账户余额。</p>
+        <div class="redeem-form">
+            <input type="password" id="deepseek-api-key" placeholder="sk-..." autocomplete="off">
+            <button id="btn-bind-key" class="btn-primary">绑定并验证</button>
+        </div>
+        <div class="token-action-row">
+            <button id="btn-refresh-deepseek" class="btn-secondary" type="button">刷新真实余额</button>
+            <button id="btn-remove-key" class="btn-ghost" type="button">移除绑定</button>
+        </div>
+        <div id="deepseek-account-detail" class="deepseek-account-detail"></div>
+        <p id="deepseek-msg" class="msg"></p>
+    </section>
+
+    <section class="card glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">官方入口</span>
+                <h3>购买与充值</h3>
+            </div>
+        </div>
+        <p class="section-desc">本系统不再提供本地虚拟套餐。真实额度以 DeepSeek 官方平台为准，充值后回到本页刷新余额。</p>
+        <div class="deepseek-link-grid">
+            <a class="package-card deepseek-link-card" href="https://platform.deepseek.com" target="_blank" rel="noopener">
+                <div class="pkg-name">DeepSeek 控制台</div>
+                <p class="pkg-desc">进入官方平台查看账户、用量和充值入口。</p>
+            </a>
+            <a class="package-card deepseek-link-card" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">
+                <div class="pkg-name">创建 API Key</div>
+                <p class="pkg-desc">在官方平台创建用于本系统绑定的密钥。</p>
+            </a>
+            <a class="package-card deepseek-link-card" href="https://platform.deepseek.com/top_up" target="_blank" rel="noopener">
+                <div class="pkg-name">充值购买</div>
+                <p class="pkg-desc">充值后本页刷新即可同步真实余额。</p>
+            </a>
+            <a class="package-card deepseek-link-card" href="https://api-docs.deepseek.com/quick_start/pricing" target="_blank" rel="noopener">
+                <div class="pkg-name">价格说明</div>
+                <p class="pkg-desc">查看 DeepSeek 官方模型价格和扣费规则。</p>
+            </a>
+        </div>
+    </section>
+
+    <section class="card glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">记录</span>
+                <h3>近 7 天系统用量记录</h3>
+            </div>
+        </div>
+        <p class="section-desc">这里记录本系统内的绑定、同步和功能消耗行为；真实余额仍以 DeepSeek 官方返回为准。</p>
+        <div id="token-logs" class="logs-list"></div>
+    </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/tokens.js?v=20260610a"></script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}图表解析 · Reference System{% endblock %}
+{% block page_eyebrow %}Chart{% endblock %}
+{% block page_title %}图表解析{% endblock %}
+{% block content %}
+<div class="workbench-main-grid codegen-workbench">
+    <section class="control-panel glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">输入</span>
+                <h3>上传图表图片</h3>
+            </div>
+        </div>
+
+        <div class="upload-area" id="chart-upload-area">
+            <input type="file" id="chart-file-input" accept=".png,.jpg,.jpeg,.gif,.webp" hidden>
+            <div class="upload-icon">IMG</div>
+            <p class="upload-text">拖拽图表图片到这里，或点击选择文件</p>
+            <p class="upload-hint">支持 `.png/.jpg/.jpeg/.gif/.webp`，单文件不超过 10MB</p>
+        </div>
+
+        <div class="actions-bar">
+            <button id="btn-chart-analyze" class="btn-primary">开始解析</button>
+        </div>
+    </section>
+
+    <section class="result-panel glass-card">
+        <div class="home-card-header">
+            <div>
+                <span class="panel-eyebrow">结果</span>
+                <h3>解析结果</h3>
+            </div>
+        </div>
+
+        <div id="chart-result" class="output-area">上传图表后，这里会显示解析结果。</div>
+        <div id="chart-preview" class="actions-bar" style="margin-top:18px;"></div>
+    </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/chart.js?v=20260609a"></script>
+{% endblock %}
