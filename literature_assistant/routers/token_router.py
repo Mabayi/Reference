@@ -46,7 +46,7 @@ async def bind_deepseek_key(request: Request, body: BindDeepSeekKeyRequest):
     user = require_login(request)
     balance = token_repo.get_balance(user["id"])
     if int(balance.get("is_disabled") or 0):
-        return {"code": 1, "data": None, "message": "当前账户 Token 已被停用，请联系客服"}
+        return {"code": 1, "data": None, "message": "当前账户 API 使用已被停用，请联系客服"}
 
     try:
         remote_balance = await deepseek_account_service.fetch_user_balance(body.api_key)
