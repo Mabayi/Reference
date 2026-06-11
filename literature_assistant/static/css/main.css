@@ -3136,7 +3136,13 @@ body[data-theme="light"] .paper-row-actions .btn-danger {
 
 .redeem-form {
     display: flex;
+    align-items: center;
+    flex: 1;
     gap: 12px;
+}
+
+.redeem-form input {
+    min-width: 240px;
 }
 
 .token-action-row {
@@ -3166,6 +3172,10 @@ body[data-theme="light"] .paper-row-actions .btn-danger {
 .discount-contact-box p {
     color: var(--text-secondary);
     font-size: 13px;
+}
+
+.token-redeem-box {
+    align-items: flex-end;
 }
 
 .wechat-modal[hidden] {
@@ -3816,11 +3826,13 @@ body[data-theme="light"] .ann-delete {
 }
 
 .auth-showcase h2 {
-    font-size: clamp(32px, 3vw, 46px);
+    font-size: clamp(24px, 3vw, 46px);
     line-height: 1.12;
     letter-spacing: 0;
-    max-width: 16ch;
+    max-width: 100%;
     margin-bottom: 14px;
+    white-space: nowrap;
+    word-break: keep-all;
 }
 
 .auth-showcase p {
@@ -5408,6 +5420,20 @@ body.admin-console[data-theme="light"] {
     .table-actions {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .auth-showcase h2 {
+        font-size: clamp(22px, 6.4vw, 28px);
+    }
+
+    .discount-contact-box,
+    .token-redeem-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .redeem-form input {
+        min-width: 0;
     }
 
     .btn-primary,

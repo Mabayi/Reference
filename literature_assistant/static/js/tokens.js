@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const messageBox = document.getElementById("token-msg");
     const detailBox = document.getElementById("system-account-detail");
     const discountContactButton = document.getElementById("btn-discount-contact");
+    const redeemForm = document.getElementById("redeem-form");
+    const redeemInput = document.getElementById("redeem-key");
+    const redeemButton = document.getElementById("btn-redeem-key");
     const wechatModal = document.getElementById("wechat-contact-modal");
 
     function setMessage(message, ok = true) {
@@ -134,6 +137,52 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
+    async function redeemKey(event) {
+        event.preventDefault();
+        const key = redeemInput?.value.trim() || "";
+
+        if (!key) {
+            setMessage("请输入兑换码或密钥", false);
+            redeemInput?.focus();
+            return;
+        }
+
+        const originalText = redeemButton?.textContent || "兑换";
+        if (redeemButton) {
+            redeemButton.disabled = true;
+            redeemButton.textContent = "兑换中";
+        }
+
+        try {
+            const response = await fetch("/api/tokens/redeem", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ key }),
+            });
+            const data = await response.json();
+            const ok = data.code === 0;
+            const message = data.message || (ok ? "兑换成功" : "兑换失败");
+
+            setMessage(message, ok);
+            window.appNotify(message, ok ? "success" : "warning");
+
+            if (ok) {
+                redeemInput.value = "";
+                await Promise.all([loadSystemStatus(), loadStats(), loadLogs()]);
+            }
+        } catch (error) {
+            setMessage("兑换请求失败，请稍后重试", false);
+            window.appNotify("兑换请求失败，请稍后重试", "error");
+        } finally {
+            if (redeemButton) {
+                redeemButton.disabled = false;
+                redeemButton.textContent = originalText;
+            }
+        }
+    }
+
     function openWechatModal() {
         if (!wechatModal) {
             return;
@@ -151,6 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     discountContactButton?.addEventListener("click", openWechatModal);
+    redeemForm?.addEventListener("submit", redeemKey);
     wechatModal?.querySelectorAll("[data-wechat-close]").forEach((element) => {
         element.addEventListener("click", closeWechatModal);
     });

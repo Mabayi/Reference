@@ -51,7 +51,30 @@
             </div>
             <button id="btn-discount-contact" class="btn-primary" type="button">添加客服微信</button>
         </div>
+        <div class="discount-contact-box token-redeem-box">
+            <div>
+                <span class="panel-eyebrow">密钥兑换</span>
+                <h4>已有兑换码或密钥？</h4>
+                <p>输入兑换码或密钥后，系统会检查当前是否支持兑换。</p>
+            </div>
+            <form id="redeem-form" class="redeem-form">
+                <input id="redeem-key" type="text" name="key" autocomplete="off" placeholder="输入兑换码 / 密钥">
+                <button id="btn-redeem-key" class="btn-secondary" type="submit">兑换</button>
+            </form>
+        </div>
         <div class="deepseek-link-grid">
+            <a class="package-card deepseek-link-card" href="https://platform.deepseek.com" target="_blank" rel="noopener">
+                <div class="pkg-name">DeepSeek 控制台</div>
+                <p class="pkg-desc">进入官方平台查看账户、余额、用量和模型服务状态。</p>
+            </a>
+            <a class="package-card deepseek-link-card" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">
+                <div class="pkg-name">创建 API Key</div>
+                <p class="pkg-desc">前往 DeepSeek 官方 API Keys 页面创建或管理你的密钥。</p>
+            </a>
+            <a class="package-card deepseek-link-card" href="https://platform.deepseek.com/top_up" target="_blank" rel="noopener">
+                <div class="pkg-name">官方充值入口</div>
+                <p class="pkg-desc">使用 DeepSeek 官方充值入口购买账户余额。</p>
+            </a>
             <a class="package-card deepseek-link-card" href="https://api-docs.deepseek.com/quick_start/pricing" target="_blank" rel="noopener">
                 <div class="pkg-name">官方价格参考</div>
                 <p class="pkg-desc">查看 DeepSeek 官方模型价格，便于对比系统内额度消耗。</p>
@@ -101,5 +124,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/tokens.js?v=20260610c"></script>
+<script src="/static/js/tokens.js?v=20260610d"></script>
 {% endblock %}
