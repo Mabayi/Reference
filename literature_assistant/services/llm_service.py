@@ -35,7 +35,7 @@ def _resolve_api_key(api_key: str | None = None, user_id: int | None = None) -> 
         if not ok:
             raise LLMConfigurationError(message)
 
-    resolved = (api_key or "").strip() or settings.DEEPSEEK_API_KEY or _get_bound_api_key(resolved_user_id)
+    resolved = (api_key or "").strip() or _get_bound_api_key(resolved_user_id) or settings.DEEPSEEK_API_KEY
     if not resolved:
         raise LLMConfigurationError("系统 API Key 未配置，请联系管理员处理。")
     return resolved
@@ -63,6 +63,8 @@ def _record_usage(payload: dict[str, Any], description: str, user_id: int | None
     except (TypeError, ValueError):
         total_tokens = 0
     if total_tokens > 0:
+        if token_repo.get_deepseek_api_key(resolved_user_id):
+            return
         token_repo.record_api_usage(resolved_user_id, total_tokens, description)
 
 

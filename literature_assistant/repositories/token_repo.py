@@ -196,6 +196,15 @@ def update_deepseek_balance(user_id: int, balance_payload: dict) -> dict | None:
     return get_deepseek_api_key(user_id)
 
 
+def find_deepseek_key_owner(api_key: str) -> int | None:
+    clean_key = api_key.strip()
+    if not clean_key:
+        return None
+    with _get_conn() as conn:
+        row = conn.execute("SELECT user_id FROM deepseek_api_keys WHERE api_key = ?", (clean_key,)).fetchone()
+        return int(row["user_id"]) if row else None
+
+
 def get_deepseek_api_key(user_id: int, include_secret: bool = False) -> dict | None:
     with _get_conn() as conn:
         row = conn.execute("SELECT * FROM deepseek_api_keys WHERE user_id = ?", (user_id,)).fetchone()
@@ -266,8 +275,11 @@ def validate_api_access(user_id: int) -> tuple[bool, str]:
     balance = get_balance(user_id)
     if int(balance.get("is_disabled") or 0):
         return False, "当前账户 API 使用已被管理员停用，请联系客服恢复。"
+    account = get_deepseek_api_key(user_id)
+    if account and int(account.get("is_available") or 0):
+        return True, "ok"
     if int(balance.get("balance") or 0) <= 0:
-        return False, "试用额度已用完，请在 Token 页面联系客服充值。"
+        return False, "试用额度已用完，请在 Token 页面联系客服充值，或兑换有效的 DeepSeek API Key。"
     return True, "ok"
 
 

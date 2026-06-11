@@ -33,13 +33,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const balanceElement = document.getElementById("local-balance");
         const statusElement = document.getElementById("system-key-status");
         const balance = status.balance || {};
+        const userAccount = status.user_account || {};
+        const keySource = status.key_source || "none";
         const isConfigured = Boolean(status.is_bound);
 
         if (balanceElement) {
             balanceElement.textContent = balance.balance_text || formatCents(balance.balance || 0);
         }
         if (statusElement) {
-            statusElement.textContent = isConfigured ? "可用" : "未配置";
+            statusElement.textContent = keySource === "user" ? "用户 Key" : (isConfigured ? "系统 Key" : "未配置");
         }
         if (!detailBox) {
             return;
@@ -48,24 +50,31 @@ document.addEventListener("DOMContentLoaded", () => {
         detailBox.innerHTML = `
             <div class="deepseek-key-card">
                 <div>
-                    <span>系统 Key</span>
+                    <span>${keySource === "user" ? "已兑换 Key" : "当前 Key"}</span>
                     <strong>${window.appEscapeHtml(status.key_mask || "未配置")}</strong>
                 </div>
                 <div>
-                    <span>扣费规则</span>
-                    <strong>${window.appEscapeHtml(String(status.billing_cents_per_1000_tokens || "0"))} 分 / 1000 tokens</strong>
+                    <span>使用来源</span>
+                    <strong>${keySource === "user" ? "用户已绑定" : (keySource === "system" ? "系统统一 Key" : "未配置")}</strong>
                 </div>
             </div>
             <div class="deepseek-balance-list">
+                ${keySource === "user" ? `
+                <div class="deepseek-balance-row">
+                    <span>DeepSeek Key 余额</span>
+                    <strong>${window.appEscapeHtml(userAccount.balance_text || "未同步")}</strong>
+                    <small>AI 调用会优先使用已兑换的用户 Key，不再消耗本地试用额度。</small>
+                </div>
+                ` : ""}
                 <div class="deepseek-balance-row">
                     <span>当前额度</span>
                     <strong>${window.appEscapeHtml(balance.balance_text || formatCents(balance.balance || 0))}</strong>
-                    <small>新用户注册默认赠送 5 元，AI 调用后自动扣减。</small>
+                    <small>未绑定用户 Key 时使用系统统一 Key，并按本地额度扣费。</small>
                 </div>
                 <div class="deepseek-balance-row">
                     <span>累计充值</span>
                     <strong>${window.appEscapeHtml(balance.total_purchased_text || "¥0.00")}</strong>
-                    <small>线上支付未开通，充值请联系页面下方客服微信。</small>
+                    <small>购买到 sk- 开头的 DeepSeek API Key 后，可在下方兑换并绑定。</small>
                 </div>
             </div>
         `;
@@ -147,10 +156,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const originalText = redeemButton?.textContent || "兑换";
+        const originalText = redeemButton?.textContent || "兑换并绑定";
         if (redeemButton) {
             redeemButton.disabled = true;
-            redeemButton.textContent = "兑换中";
+            redeemButton.textContent = "校验中";
         }
 
         try {
